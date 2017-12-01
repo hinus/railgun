@@ -3,6 +3,9 @@ package org.railgun.vm;
 public class Bytecode {
     // Define org.railgun.vm.Bytecode Operator Code
     static final byte POP_TOP = 1;
+    static final byte ROT_TWO = 2;
+    static final byte DUP_TOP = 4;
+    static final byte UNARY_NEGATIVE = 11;
     static final byte BINARY_MULTIPLY = 20;
     static final byte BINARY_DIVIDE = 21;
     static final byte BINARY_ADD = 23;
@@ -22,9 +25,11 @@ public class Bytecode {
     static final byte HAVE_ARGUMENT = 90; /* Opcodes from here have an argument: */
 
     static final byte STORE_NAME = 90; /* Index in name list */
+    static final byte STORE_ATTR = 95;  /* Index in name list */
     static final byte STORE_GLOBAL = 97;
     static final byte LOAD_CONST = 100; /* Index in const list */
     static final byte LOAD_NAME = 101; /* Index in name list */
+    static final byte LOAD_ATTR = 106; /* Index in name list */
     static final byte COMPARE_OP = 107; /* Comparison operator */
     static final byte JUMP_ABSOLUTE = 113;
     static final byte POP_JUMP_IF_FALSE = 114;

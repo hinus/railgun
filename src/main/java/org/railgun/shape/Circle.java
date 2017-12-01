@@ -39,6 +39,14 @@ public class Circle extends AbstractShape {
         return r;
     }
 
+    public static Circle makeCircle(int x, int y, double radius, Color color) {
+        Circle r = new Circle(x, y, radius, radius);
+        r.withBorder = false;
+        r.isFilled = true;
+        r.color = color;
+        return r;
+    }
+
     @Override
     public void draw(GraphicsContext gc) {
         double x = this.x + this.offsetX;

@@ -32,4 +32,12 @@ public class View {
             shape.draw(graph);
         }
     }
+
+    public void drawShape(Shape shape) {
+        shape.draw(graph);
+    }
+
+    public void clear() {
+        this.graph.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+    }
 }

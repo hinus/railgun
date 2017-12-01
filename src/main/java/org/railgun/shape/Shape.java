@@ -10,6 +10,9 @@ public interface Shape {
     void setX(int x);
     void setY(int y);
 
+    int getX();
+    int getY();
+
     void setOffsetX(double offsetX);
     void setOffsetY(double offsetY);
 
@@ -20,6 +23,4 @@ public interface Shape {
     Shape rotate(int x0, int y0, double angular);
     Shape rotate(double angular);
     Shape scale(double scalar);
-
-    void update(long frameCnt);
 }

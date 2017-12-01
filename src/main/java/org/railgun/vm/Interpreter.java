@@ -1,9 +1,12 @@
 package org.railgun.vm;
 
+import javafx.scene.paint.Color;
 import org.railgun.action.ActionController;
-import org.railgun.canvas.RailGunDrawer;
+import org.railgun.canvas.View;
 import org.railgun.marshal.BinaryFileParser;
 import org.railgun.marshal.CodeObject;
+import org.railgun.shape.Circle;
+import org.railgun.shape.Shape;
 
 import java.util.*;
 
@@ -87,9 +90,25 @@ public class Interpreter {
                 optarg = x86 ? (optArr[pc++] & 0xFF) : ((optArr[pc++] & 0xFF) + ((optArr[pc++] & 0xFF) << 8));
             }
             Integer lhs, rhs;
+            Object v, w, attr;
             switch (optcode) {
                 case Bytecode.POP_TOP:
                     stack.pop();
+                    break;
+                // 2
+                case Bytecode.ROT_TWO:
+                    v = stack.pop();
+                    w = stack.pop();
+                    stack.push(v);
+                    stack.push(w);
+                    break;
+                // 4
+                case Bytecode.DUP_TOP:
+                    stack.push(stack.peek());
+                    break;
+                case Bytecode.UNARY_NEGATIVE:
+                    v = stack.pop();
+                    stack.push(-((Integer)v).intValue());
                     break;
                 // 57
                 case Bytecode.INPLACE_MULTIPLY:
@@ -125,7 +144,20 @@ public class Interpreter {
                     break;
                 // 71
                 case Bytecode.PRINT_ITEM:
-                    System.out.print(stack.pop());
+                    Object printObject = stack.pop();
+
+                    if (printObject instanceof ArrayList) {
+                        for (Object obj : (ArrayList)printObject) {
+                            if (obj instanceof Shape) {
+                                View.getView().drawShape((Shape)obj);
+                            }
+                        }
+                    }
+                    else if (printObject instanceof Shape) {
+                        View.getView().drawShape((Shape) printObject);
+                    }
+
+                    System.out.print(printObject);
                     break;
                 // 72
                 case Bytecode.PRINT_NEWLINE:
@@ -147,19 +179,41 @@ public class Interpreter {
                     }
                     break;
 
+                // 95
+                case Bytecode.STORE_ATTR:
+                    v = stack.pop();
+                    w = stack.pop();
+
+                    attr = (String)names.get(optarg);
+
+                    if (v instanceof Shape) {
+                        if (attr.equals("x")) {
+                            ((Shape)v).setX((Integer)w);
+                        }
+                        else if (attr.equals("y")) {
+                            ((Shape)v).setY((Integer)w);
+                        }
+                    }
+
+                    break;
+
                 // TODO: Have Argument
                 // 97
                 case Bytecode.STORE_GLOBAL:
                 // 90
                 case Bytecode.STORE_NAME:
                     String checkKeyMap = (String)names.get(optarg);
+                    Object checkKeyMapObject = stack.pop();
 
                     if (checkKeyMap.equals("KeyMap")) {
-                        ActionController.getActionController().setKeyMap((HashMap) stack.pop());
+                        ActionController.getActionController().setKeyMap((HashMap) checkKeyMapObject);
                     }
-                    else {
-                        namesTable.put(checkKeyMap, stack.pop());
+                    else if (checkKeyMap.equals("update") && checkKeyMapObject instanceof CodeObject) {
+                        ActionController.getActionController().setUpdateFunction((CodeObject)checkKeyMapObject);
                     }
+
+                    namesTable.put(checkKeyMap, checkKeyMapObject);
+
                     break;
                 // 116
                 case Bytecode.LOAD_GLOBAL:
@@ -167,7 +221,7 @@ public class Interpreter {
                 case Bytecode.LOAD_NAME:
                     String viariableName = (String)names.get(optarg);
 
-                    if (viariableName.equals("circle")) {
+                    if (viariableName.equals("circle") || viariableName.equals("rgb")) {
                         stack.push(viariableName);
                     }
                     else {
@@ -178,6 +232,20 @@ public class Interpreter {
                 case Bytecode.LOAD_CONST:
                     stack.push(consts.get(optarg));
                     break;
+                case Bytecode.LOAD_ATTR:
+                    v = stack.pop();
+                    w = names.get(optarg);
+
+                    if (v instanceof Shape) {
+                        if (((String)w).equals("x")) {
+                            stack.push(((Shape)v).getX());
+                        }
+                        else if (((String)w).equals("y")) {
+                            stack.push(((Shape)v).getY());
+                        }
+                    }
+                    break;
+
                 // 107
                 case Bytecode.COMPARE_OP:
                     // TODO: Only for Integer
@@ -225,7 +293,7 @@ public class Interpreter {
                 case Bytecode.LOAD_FAST:
                     String fastVarName = (String)varnames.get(optarg);
 
-                    if (fastVarName.equals("circle")) {
+                    if (fastVarName.equals("circle") || fastVarName.equals("rgb")) {
                         stack.push(fastVarName);
                     }
                     else {
@@ -248,9 +316,13 @@ public class Interpreter {
                     if (o instanceof String) {
                         String funcName = (String) o;
                         if (funcName.equals("circle")) {
-                            RailGunDrawer.getRailGunDrawer().drawCircle((Integer) nextArgs[2],
-                                    (Integer)nextArgs[1],
-                                    ((Integer) nextArgs[0]).doubleValue());
+                            stack.push(Circle.makeCircle((Integer) nextArgs[3],
+                                    (Integer)nextArgs[2],
+                                    ((Integer) nextArgs[1]).doubleValue(),
+                                    (Color)nextArgs[0]));
+                        }
+                        else if (funcName.equals("rgb")) {
+                            stack.push(Color.rgb((Integer)nextArgs[2], (Integer)nextArgs[1], (Integer)nextArgs[0]));
                         }
                     } else {
                         curFrame.pc = pc;
@@ -295,7 +367,6 @@ public class Interpreter {
                     HashMap<Object, Object> map = (HashMap<Object, Object>) (stack.peek());
                     map.put(objLeft, objRight);
                     break;
-
             }
         }
     }

@@ -12,6 +12,16 @@ public class ActionController {
 
     private HashMap keyMap = new HashMap<>();
 
+    private CodeObject updateFunction;
+
+    public CodeObject getUpdateFunction() {
+        return updateFunction;
+    }
+
+    public void setUpdateFunction(CodeObject updateFunction) {
+        this.updateFunction = updateFunction;
+    }
+
     public ActionController() {
     }
 

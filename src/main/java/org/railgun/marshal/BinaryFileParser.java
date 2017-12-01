@@ -140,10 +140,10 @@ public class BinaryFileParser {
     }
 
     static int getLong(byte[] buf) {
-        int r = ((int)buf[cur + 3]) << 24 |
-                ((int)buf[cur + 2] << 16) |
-                ((int)buf[cur + 1] << 8) |
-                buf[cur];
+        int r = ((buf[cur + 3] & 0xff) << 24) |
+                ((buf[cur + 2] & 0xff) << 16) |
+                ((buf[cur + 1] & 0xff) << 8) |
+                (buf[cur] & 0xff);
         cur += 4;
         return r;
     }

@@ -10,10 +10,8 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.railgun.action.*;
 import org.railgun.animation.TransitionController;
-import org.railgun.canvas.RailGunDrawer;
 import org.railgun.marshal.BinaryFileParser;
 import org.railgun.shape.Circle;
-import org.railgun.shape.Model;
 import org.railgun.shape.Rect;
 import org.railgun.shape.Star;
 
@@ -69,10 +67,8 @@ public class RailGun extends Application {
         primaryStage.show();
 
         // some test case
-        //RailGunDrawer.getRailGunDrawer().drawCircle(100, 100, 100);
         /*
         /// Chinese flag
-        RailGunDrawer.getRailGunDrawer().drawRect(100, 100, 600, 400);
         Star s = Star.makeStar(200, 200, 60);
         Star s2 = Star.makeStar(300, 140, 20);
         s2.rotate(-0.8771);
@@ -82,24 +78,14 @@ public class RailGun extends Application {
         s4.rotate(0.0584);
         Star s5 = Star.makeStar(300, 280, 20);
         s5.rotate(0.3381);
-
-        Model.getModel().addShape(s);
-        Model.getModel().addShape(s2);
-        Model.getModel().addShape(s3);
-        Model.getModel().addShape(s4);
-        Model.getModel().addShape(s5);
         */
 
 
         /*
         Rect redRect = Rect.makeRect(100, 100, 180, 400, true, Color.rgb(239, 65, 53));
         Rect whiteRect = Rect.makeRect(280, 100, 198, 400, true, Color.WHITE);
-        Rect blueRect = Rect.makeRect(478, 100, 222, 400, true, Color.rgb(0, 85, 164));
-        Model.getModel().addShape(redRect);
-        Model.getModel().addShape(whiteRect);
-        Model.getModel().addShape(blueRect);*/
+        Rect blueRect = Rect.makeRect(478, 100, 222, 400, true, Color.rgb(0, 85, 164));*/
 
-        //RailGunDrawer.getRailGunDrawer().drawStar(200, 200, 33);
 
         /*
         try {
@@ -115,7 +101,6 @@ public class RailGun extends Application {
         /*
         Circle c = Circle.makeCircle(200, 200, 60, 60, true);
         c.setMoveController(new TransitionController(c, 400, 0, 500, 0, true));
-        Model.getModel().addShape(c);
         */
     }
 

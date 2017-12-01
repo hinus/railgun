@@ -1,6 +1,9 @@
 package org.railgun;
 
-import org.railgun.shape.Model;
+import org.railgun.action.ActionController;
+import org.railgun.canvas.View;
+import org.railgun.marshal.CodeObject;
+import org.railgun.vm.Interpreter;
 
 /**
  * Created by hinus on 2017/12/1.
@@ -15,11 +18,14 @@ public class Timer extends Thread {
         while (!hasDone) {
             frameCnt += 1;
             long begin = System.currentTimeMillis();
-            Model.getModel().update(frameCnt);
-            long duration = System.currentTimeMillis() - begin;
-            if (frameCnt % 50 == 0) {
-                System.out.print(duration);
+            CodeObject co = ActionController.getActionController().getUpdateFunction();
+
+            if (co != null) {
+                View.getView().clear();
+                Interpreter.getInstance().run(co);
             }
+
+            long duration = System.currentTimeMillis() - begin;
 
             // make sure only 50 frames per second
             if (duration < 20) {
