@@ -7,6 +7,7 @@ public class Bytecode {
     static final byte DUP_TOP = 4;
     static final byte UNARY_NEGATIVE = 11;
     static final byte BINARY_MULTIPLY = 20;
+    static final byte BINARY_SUBSCR = (byte) 25;
     static final byte BINARY_DIVIDE = 21;
     static final byte BINARY_ADD = 23;
     static final byte BINARY_SUBSTRACT = 24;

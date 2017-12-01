@@ -176,7 +176,7 @@ public class BinaryFileParser {
 
             switch (objectType) {
                 case 's':
-                    list.add(getCodeObject(buf));
+                    list.add(getString(buf));
                     break;
                 case 'N':
                     list.add(null);

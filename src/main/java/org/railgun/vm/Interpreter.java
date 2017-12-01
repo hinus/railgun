@@ -5,8 +5,7 @@ import org.railgun.action.ActionController;
 import org.railgun.canvas.View;
 import org.railgun.marshal.BinaryFileParser;
 import org.railgun.marshal.CodeObject;
-import org.railgun.shape.Circle;
-import org.railgun.shape.Shape;
+import org.railgun.shape.*;
 
 import java.util.*;
 
@@ -110,7 +109,22 @@ public class Interpreter {
                     v = stack.pop();
                     stack.push(-((Integer)v).intValue());
                     break;
-                // 57
+                // 25
+                case Bytecode.BINARY_SUBSCR:
+                    v = stack.pop();
+                    if(stack.peek() instanceof ArrayList)
+                    {
+                        ArrayList<Object> ar=(ArrayList<Object>)(stack.peek());
+                        stack.push(ar.get((int)(v))) ;
+                    }
+                    else
+                    {
+                        HashMap<Object, Object> mmap = (HashMap<Object, Object>) (stack.peek());
+                        stack.push(mmap.get(v));
+                    }
+                    break;
+
+                    // 57
                 case Bytecode.INPLACE_MULTIPLY:
                     // 20
                 case Bytecode.BINARY_MULTIPLY:
@@ -221,7 +235,8 @@ public class Interpreter {
                 case Bytecode.LOAD_NAME:
                     String viariableName = (String)names.get(optarg);
 
-                    if (viariableName.equals("circle") || viariableName.equals("rgb")) {
+                    if (viariableName.equals("circle") || viariableName.equals("rgb") || viariableName.equals("rgtext")
+                            || viariableName.equals("line") || viariableName.equals("roundrect")) {
                         stack.push(viariableName);
                     }
                     else {
@@ -293,7 +308,8 @@ public class Interpreter {
                 case Bytecode.LOAD_FAST:
                     String fastVarName = (String)varnames.get(optarg);
 
-                    if (fastVarName.equals("circle") || fastVarName.equals("rgb")) {
+                    if (fastVarName.equals("circle") || fastVarName.equals("rgb") || fastVarName.equals("rgtext")
+                            || fastVarName.equals("line") || fastVarName.equals("roundrect")) {
                         stack.push(fastVarName);
                     }
                     else {
@@ -323,6 +339,22 @@ public class Interpreter {
                         }
                         else if (funcName.equals("rgb")) {
                             stack.push(Color.rgb((Integer)nextArgs[2], (Integer)nextArgs[1], (Integer)nextArgs[0]));
+                        }
+                        else if (funcName.equals("rgtext")) {
+                            stack.push(RGText.makeText((String)nextArgs[4], (Integer)nextArgs[3], (Integer)nextArgs[2],
+                                    (String)nextArgs[1], ((Integer)nextArgs[0]).doubleValue()));
+                        }
+                        else if (funcName.equals("line")) {
+                            stack.push(new RGLine((Integer) nextArgs[3],
+                                    (Integer)nextArgs[2],
+                                    (Integer) nextArgs[1],
+                                    (Integer)nextArgs[0]));
+                        }
+                        else if (funcName.equals("roundrect")) {
+                            stack.push(RGRoundRect.makeRoundRect((Integer) nextArgs[5],
+                                    (Integer)nextArgs[4], (Integer)nextArgs[3],
+                                    (Integer) nextArgs[2], (Integer)nextArgs[1],
+                                    (Integer)nextArgs[0]));
                         }
                     } else {
                         curFrame.pc = pc;
