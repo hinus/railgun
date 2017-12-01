@@ -18,6 +18,6 @@ public class RunHandler implements EventHandler<ActionEvent> {
         timer.setDaemon(true);
         timer.start();
 
-        new Interpreter().run(FileManager.getInstance().getBinaryContent());
+        Interpreter.getInstance().run(FileManager.getInstance().getBinaryContent());
     }
 }

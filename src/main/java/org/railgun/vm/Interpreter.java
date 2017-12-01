@@ -5,20 +5,14 @@ import org.railgun.canvas.RailGunDrawer;
 import org.railgun.marshal.BinaryFileParser;
 import org.railgun.marshal.CodeObject;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.*;
 
 public class Interpreter {
-
-    private static boolean x86 = false;
 
     // Stack based Virtual Machine
     private static class Frame {
         public List<Object> consts;
         public List<Object> names;
-        public Map<String, Object> namesTable;
         public Map<String, Object> varnamesTable;
         public List<Object> varnames;
         public Stack<Object> stack;
@@ -29,7 +23,6 @@ public class Interpreter {
             this.consts = consts;
             this.names = names;
             this.varnames = varnames;
-            namesTable = new HashMap<>();
             varnamesTable = new HashMap<>();
             this.stack = stack;
             this.optArr = optArr;
@@ -37,21 +30,38 @@ public class Interpreter {
         }
     }
 
+    private static Interpreter instance = new Interpreter();
+
+    private static boolean x86 = false;
+
+    public static Interpreter getInstance() {
+        return instance;
+    }
+
     // Init stack trace
     Stack<Frame> stackTrace = new Stack<>();
+    // Global variable table
+    private Map<String, Object> namesTable = new HashMap<>();
+
+    // Run with source bytes
     public void run (byte[] sourceBytes) {
         // Read code object from bytecode
         CodeObject co = BinaryFileParser.parse(sourceBytes);
 
+        run(co);
+    }
+
+    // Run with code object
+    public void run (CodeObject co) {
         // Construct base frame
         Frame baseFrame = new Frame(co.consts, co.names, co.varnames, co.bytecodes, new Stack<>(), 0);
 
         // Interpret current frame
-        interpret(baseFrame);
+        interpret(baseFrame, new Stack<>());
     }
 
     // Interpret Instructions
-    void interpret (Frame curFrame) {
+    void interpret (Frame curFrame, Stack<Frame> stackTrace) {
         // Program Counter
         int pc = curFrame.pc;
         // Bytecodes Array
@@ -66,7 +76,6 @@ public class Interpreter {
         Map<String, Object> varnamesTable = curFrame.varnamesTable;
         // Bytecode global variable
         List<Object> names = curFrame.names;
-        Map<String, Object> namesTable = curFrame.namesTable;
         Stack<Object> stack = curFrame.stack;
 
         while (pc < optLength) {
@@ -131,7 +140,6 @@ public class Interpreter {
                         optArr = curFrame.optArr;
                         names = curFrame.names;
                         varnames = curFrame.varnames;
-                        //namesTable = curFrame.namesTable;
                         varnamesTable = curFrame.varnamesTable;
                         stack = curFrame.stack;
                         pc = curFrame.pc;
@@ -253,7 +261,6 @@ public class Interpreter {
                         consts = curFrame.consts;
                         names = curFrame.names;
                         varnames = curFrame.varnames;
-                        // namesTable = curFrame.namesTable;
                         varnamesTable = curFrame.varnamesTable;
                         optArr = curFrame.optArr;
                         stack = curFrame.stack;

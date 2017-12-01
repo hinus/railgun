@@ -3,6 +3,7 @@ package org.railgun.action;
 import javafx.event.EventHandler;
 import javafx.scene.input.KeyEvent;
 import org.railgun.marshal.CodeObject;
+import org.railgun.vm.Interpreter;
 
 /**
  * Created by hinus on 2017/12/2.
@@ -28,5 +29,6 @@ public class KeyPressedHandler implements EventHandler<KeyEvent> {
                 co = (CodeObject) ActionController.getActionController().getKeyMap().get("VK_SPACE");
                 break;
         }
+        Interpreter.getInstance().run(co);
     }
 }
