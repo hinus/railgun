@@ -74,6 +74,11 @@ public class BinaryFileParser {
             cur++;
             return getString(buf);
         }
+        else if (buf[cur] == 'R') {
+            cur++;
+            int index = getLong(buf);
+            return stringTable.get(index);
+        }
 
         return null;
     }
@@ -115,6 +120,11 @@ public class BinaryFileParser {
             String s = getString(buf);
             stringTable.add(s);
             return s;
+        }
+        else if (buf[cur] == 'R') {
+            cur++;
+            int index = getLong(buf);
+            return stringTable.get(index);
         }
 
         return null;
