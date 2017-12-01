@@ -1,5 +1,7 @@
 package org.railgun.shape;
 
+import org.railgun.animation.Controller;
+
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 
@@ -14,6 +16,8 @@ public abstract class AbstractShape implements Shape {
 
     protected double offsetX;
     protected double offsetY;
+
+    private Controller moveController;
 
     public AbstractShape(int layer) {
         this.layer = layer;
@@ -55,7 +59,9 @@ public abstract class AbstractShape implements Shape {
 
     @Override
     public void update(long frameCnt) {
-
+        if (this.moveController != null) {
+            this.moveController.update(frameCnt);
+        }
     }
 
     @Override
@@ -91,5 +97,9 @@ public abstract class AbstractShape implements Shape {
     @Override
     public Shape scale(double scalar) {
         return null;
+    }
+
+    public void setMoveController(Controller moveController) {
+        this.moveController = moveController;
     }
 }

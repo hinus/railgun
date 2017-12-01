@@ -11,14 +11,12 @@ import org.railgun.FileManager;
 import java.io.*;
 
 /**
- * Created by hinus on 2017/11/30.
+ * Created by hinus on 2017/12/1.
  */
-public class OpenFileHandler implements EventHandler<ActionEvent> {
+public class OpenBinaryHandler implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
         Stage mainStage = Controls.getInstance().getMainStage();
-        TextArea ta = Controls.getInstance().getSourceCode();
-
         FileManager fileManager = FileManager.getInstance();
 
         if (fileManager.isDirty()) {
@@ -30,9 +28,9 @@ public class OpenFileHandler implements EventHandler<ActionEvent> {
         Controls.getInstance().closeTimer();
 
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Source File");
+        fileChooser.setTitle("Open Binary File");
         fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("RailGun Source File", "*.rg"));
+                new FileChooser.ExtensionFilter("RailGun Binary File", "*.rgb"));
 
         File selectedFile = fileChooser.showOpenDialog(mainStage);
 
@@ -42,18 +40,11 @@ public class OpenFileHandler implements EventHandler<ActionEvent> {
 
         String sourceFileName = selectedFile.getAbsolutePath();
 
-        fileManager.setSourceFileName(sourceFileName);
-
-        String binaryFileName = sourceFileName + "b";
-
-        File binaryFile = new File(binaryFileName);
-        if (binaryFile != null && binaryFile.exists()) {
-            fileManager.setBinaryFileName(binaryFileName);
-        }
+        fileManager.setBinaryFileName(sourceFileName);
 
         long length = selectedFile.length();
         if (length > 256 * 1024) {
-            System.out.println("source code file is too large");
+            System.out.println("binary file is too large");
             return;
         }
         byte[] sourceContent = new byte[(int)length];
@@ -61,23 +52,14 @@ public class OpenFileHandler implements EventHandler<ActionEvent> {
         try {
             FileInputStream fileInputStream = new FileInputStream(selectedFile);
             fileInputStream.read(sourceContent);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(sourceContent)));
+            fileManager.setBinaryContent(sourceContent);
 
-            String s;
-            ta.clear();
-            ta.setDisable(false);
-            while ((s = reader.readLine()) != null) {
-                ta.appendText(s);
-                ta.appendText("\n");
-            }
-            fileManager.setDirty(false);
-
-            reader.close();
             fileInputStream.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 }

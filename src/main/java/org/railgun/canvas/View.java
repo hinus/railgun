@@ -27,6 +27,7 @@ public class View {
     }
 
     public void update(ArrayList<Shape> shapes) {
+        graph.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         for (Shape shape : shapes) {
             shape.draw(graph);
         }

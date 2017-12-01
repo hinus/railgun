@@ -9,8 +9,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.railgun.action.*;
+import org.railgun.animation.TransitionController;
 import org.railgun.canvas.RailGunDrawer;
 import org.railgun.marshal.BinaryFileParser;
+import org.railgun.shape.Circle;
 import org.railgun.shape.Model;
 import org.railgun.shape.Rect;
 import org.railgun.shape.Star;
@@ -98,6 +100,7 @@ public class RailGun extends Application {
 
         //RailGunDrawer.getRailGunDrawer().drawStar(200, 200, 33);
 
+        /*
         try {
             File f = new File("C:/test.pyc");
             FileInputStream fis = new FileInputStream(f);
@@ -106,7 +109,13 @@ public class RailGun extends Application {
             BinaryFileParser.parse(buf);
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
+
+        /*
+        Circle c = Circle.makeCircle(200, 200, 60, 60, true);
+        c.setMoveController(new TransitionController(c, 400, 0, 500, 0, true));
+        Model.getModel().addShape(c);
+        */
     }
 
     public void createMenu(BorderPane mainPane, Stage mainStage) {
@@ -119,7 +128,9 @@ public class RailGun extends Application {
         MenuItem closeFile = new MenuItem("Close");
         MenuItem exitMain = new MenuItem("Exit");
 
-        menuFile.getItems().addAll(openFile, newFile, saveFile, closeFile, new SeparatorMenuItem(), exitMain);
+        MenuItem openBinary = new MenuItem("Open Binary");
+
+        menuFile.getItems().addAll(openFile, newFile, saveFile, closeFile, new SeparatorMenuItem(), openBinary, new SeparatorMenuItem(), exitMain);
 
         Menu menuRun = new Menu("Run");
 
@@ -135,6 +146,8 @@ public class RailGun extends Application {
         newFile.setOnAction(new NewFileHandler());
         saveFile.setOnAction(new SaveHandler());
         closeFile.setOnAction(new CloseHandler());
+
+        openBinary.setOnAction(new OpenBinaryHandler());
 
         exitMain.setOnAction(new ExitHandler());
 
