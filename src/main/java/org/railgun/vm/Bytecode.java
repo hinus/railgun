@@ -22,12 +22,14 @@ public class Bytecode {
     static final byte HAVE_ARGUMENT = 90; /* Opcodes from here have an argument: */
 
     static final byte STORE_NAME = 90; /* Index in name list */
+    static final byte STORE_GLOBAL = 97;
     static final byte LOAD_CONST = 100; /* Index in const list */
     static final byte LOAD_NAME = 101; /* Index in name list */
     static final byte COMPARE_OP = 107; /* Comparison operator */
     static final byte JUMP_ABSOLUTE = 113;
     static final byte POP_JUMP_IF_FALSE = 114;
     static final byte POP_JUMP_IF_TRUE = 115;
+    static final byte LOAD_GLOBAL = 116; /* Index in name list */
     static final byte SETUP_LOOP = 120; /* Target address (relative) */
     static final byte LOAD_FAST  = 124; /* Local variable number */
     static final byte STORE_FAST = 125; /* Local variable number */

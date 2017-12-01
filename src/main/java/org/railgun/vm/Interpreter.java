@@ -46,11 +46,11 @@ public class Interpreter {
         Frame baseFrame = new Frame(co.consts, co.names, co.varnames, co.bytecodes, new Stack<>(), 0);
 
         // Interpret current frame
-        interpret(baseFrame, new Object[0]);
+        interpret(baseFrame);
     }
 
     // Interpret Instructions
-    void interpret (Frame curFrame, Object[] args) {
+    void interpret (Frame curFrame) {
         // Program Counter
         int pc = curFrame.pc;
         // Bytecodes Array
@@ -67,11 +67,6 @@ public class Interpreter {
         List<Object> names = curFrame.names;
         Map<String, Object> namesTable = curFrame.namesTable;
         Stack<Object> stack = curFrame.stack;
-
-        // Process Input Arguments
-        for (int i = args.length; i > 0; ++i) {
-            varnamesTable.put ((String) varnames.get(args.length - i), args[i]);
-        }
 
         while (pc < optLength) {
             // TODO: Make sure current pc is at optcode, not optarg
@@ -128,13 +123,30 @@ public class Interpreter {
                     break;
                 // 83
                 case Bytecode.RETURN_VALUE:
+                    if (! stackTrace.empty()) {
+                        curFrame = stackTrace.pop();
+                        curFrame.stack.push(stack.pop());
+                        consts = curFrame.consts;
+                        optArr = curFrame.optArr;
+                        names = curFrame.names;
+                        varnames = curFrame.varnames;
+                        //namesTable = curFrame.namesTable;
+                        varnamesTable = curFrame.varnamesTable;
+                        stack = curFrame.stack;
+                        pc = curFrame.pc;
+                        optLength = optArr.length;
+                    }
                     break;
 
                 // TODO: Have Argument
+                // 97
+                case Bytecode.STORE_GLOBAL:
                 // 90
                 case Bytecode.STORE_NAME:
                     namesTable.put((String)names.get(optarg), stack.pop());
                     break;
+                // 116
+                case Bytecode.LOAD_GLOBAL:
                 // 101
                 case Bytecode.LOAD_NAME:
                     String viariableName = (String)names.get(optarg);
@@ -213,12 +225,9 @@ public class Interpreter {
                     // Process Callee Arguments
                     Object[] nextArgs = new Object[optarg];
                     for (int i = 0; i < optarg; ++i) {
-                        nextArgs[i] = stack.pop();
+                       nextArgs[i] = stack.pop();
                     }
-                    curFrame.pc = pc;
-                    stackTrace.push(curFrame);
-
-                    Object o = stack.peek();
+                    Object o = stack.pop();
 
                     if (o instanceof String) {
                         String funcName = (String) o;
@@ -228,8 +237,24 @@ public class Interpreter {
                                     ((Integer) nextArgs[0]).doubleValue());
                         }
                     } else {
-                        CodeObject co = (CodeObject) stack.peek();
-                        interpret(new Frame(co.consts, co.names, co.varnames, co.bytecodes, new Stack<>(), 0), nextArgs);
+                        curFrame.pc = pc;
+                        stackTrace.push(curFrame);
+                        CodeObject co = (CodeObject) o;
+                        curFrame = new Frame(co.consts, co.names, co.varnames, co.bytecodes, new Stack<>(), 0);
+
+                        consts = curFrame.consts;
+                        names = curFrame.names;
+                        varnames = curFrame.varnames;
+                        // namesTable = curFrame.namesTable;
+                        varnamesTable = curFrame.varnamesTable;
+                        optArr = curFrame.optArr;
+                        stack = curFrame.stack;
+                        pc = curFrame.pc;
+                        optLength = optArr.length;
+                        // Process Input Arguments
+                        for (int i = nextArgs.length-1; i >= 0; --i) {
+                            varnamesTable.put((String) varnames.get(nextArgs.length - 1 - i), nextArgs[i]);
+                        }
                     }
                     break;
                 // 132
@@ -260,24 +285,5 @@ public class Interpreter {
         }
     }
 
-    void readFile (String fileName) {
-        byte [] sourceByte = null;
-        try {
-            File file = new File(fileName);
-            sourceByte = new byte[(int) file.length()];
-            InputStream in = new FileInputStream(file);
-            in.read(sourceByte);
-        } catch (Exception e) {}
-        run (sourceByte);
-
-
-    }
-
-    /*
-    public static void main (String[] args) {
-        Interpreter test = new Interpreter();
-        test.readFile("C:\\Users\\d00424111\\Desktop\\PythonProject\\test.pyc");
-    }
-    */
 }
 
