@@ -43,6 +43,7 @@ public class RailGun extends Application {
         Controls.getInstance().setCanvas(canvas);
 
         Scene scene = new Scene(mainPane, 1000, 750);
+        scene.setOnKeyPressed(new KeyPressedHandler());
 
         controlsManager.setMainPane(mainPane);
 

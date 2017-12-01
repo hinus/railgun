@@ -1,5 +1,6 @@
 package org.railgun.vm;
 
+import org.railgun.action.ActionController;
 import org.railgun.canvas.RailGunDrawer;
 import org.railgun.marshal.BinaryFileParser;
 import org.railgun.marshal.CodeObject;
@@ -143,7 +144,14 @@ public class Interpreter {
                 case Bytecode.STORE_GLOBAL:
                 // 90
                 case Bytecode.STORE_NAME:
-                    namesTable.put((String)names.get(optarg), stack.pop());
+                    String checkKeyMap = (String)names.get(optarg);
+
+                    if (checkKeyMap.equals("KeyMap")) {
+                        ActionController.getActionController().setKeyMap((HashMap) stack.pop());
+                    }
+                    else {
+                        namesTable.put(checkKeyMap, stack.pop());
+                    }
                     break;
                 // 116
                 case Bytecode.LOAD_GLOBAL:
