@@ -6,7 +6,7 @@ line4 = line(175, 375, 625, 375)
 
 board = [r, line1, line2, line3, line4]
 
-l = [2, 1, 0, 2, 3, 5, 4, 9, 8, 7]
+l = [2, 1, 0, 3, 4, 2, 5, 8, 6, 7]
 
 def move(dir):
 	if dir == 1 and l[0] % 3 == 0:
@@ -41,18 +41,33 @@ KeyMap = {
 	"VK_DOWN" : onDown,
 }
 
+def isWin():
+        i = 0
+        while i< 8:
+                i += 1
+                if l[i] != i:
+                        return False
+        return l[9] == 0
+        
+
 def update():
 	i = 1
-	while i <= 9:
-		if l[i] == 0:
-			i += 1
-			continue
-		
-		x = 250 + (i + 2) % 3 * 150
-		y = 150 + (i - 1) / 3 * 150
-		t = rgtext(l[i], x, y, "Arial Black", 24)
-		
-		print t
-		i += 1
-		
-	print board
+	
+	if not isWin():
+                while i <= 9:
+                        if l[i] == 0:
+                                i += 1
+                                continue
+                        
+                        x = 250 + (i + 2) % 3 * 150 - 12
+                        y = 150 + (i - 1) / 3 * 150 + 12
+                        t = rgtext(l[i], x, y, "Arial Black", 24)
+                        
+                        print t
+                        i += 1
+                        
+                print board
+        else:
+                t = rgtext("You Win", 312, 262, "Arial Black", 24)
+                print t
+                
