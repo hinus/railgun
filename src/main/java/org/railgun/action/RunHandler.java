@@ -50,7 +50,7 @@ public class RunHandler implements EventHandler<ActionEvent> {
 
             Process p = null;
             try {
-                p = Runtime.getRuntime().exec("cmd /c start D:\\\\hack\\\\compile.bat");
+                p = Runtime.getRuntime().exec("cmd /c D:\\\\hack\\\\compile.bat");
             } catch (IOException e) {
                 e.printStackTrace();
             }

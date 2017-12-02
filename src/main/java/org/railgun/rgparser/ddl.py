@@ -7,6 +7,9 @@
 # -----------------------------------------------------------------------------
 
 import sys, ast
+import marshal
+import py_compile
+import time
 sys.path.insert(0,"./ddlib")
 
 if sys.version_info[0] >= 3:
@@ -154,10 +157,17 @@ def p_file_input(p):
 
 		p[0] = ast.Module(p[1], lineno = item.lineno, col_offset = item.col_offset)
 		print ast.dump(p[0])
-
+	codeobject = compile(p[0], '<string>', 'exec')
+	with open('output.rgb', 'wb') as fc:
+		fc.write('\0\0\0\0')
+		py_compile.wr_long(fc, long(time.time()))
+		marshal.dump(codeobject, fc)
+		fc.flush()
+		fc.seek(0, 0)
+		fc.write(py_compile.MAGIC)
 	if not _debug:
 		co = compile(p[0], exec_file, 'exec')
-		exec co
+		#exec co
 
 	return
 	
@@ -787,7 +797,7 @@ def p_not_test(p):
 		p[0] = p[1]
 		
 	else:
-		p[0] = ast.UnaryOp(op = ast.Not(), operand = p[3])
+		p[0] = ast.UnaryOp(op = ast.Not(), operand = p[2])
 
 	return
 	

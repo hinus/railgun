@@ -128,7 +128,7 @@ class DDLexer(object):
             
         _type, _value, _pos_begin, _pos_end, __ = self.gt.next()
         
-        # Èç¹ûÊÇĞøĞĞµÄÇé¿ö£¬¾ÍÖ±½ÓÌø¹ı
+        # å¦‚æœæ˜¯ç»­è¡Œçš„æƒ…å†µï¼Œå°±ç›´æ¥è·³è¿‡
         while _type in (tk.NL, tk.COMMENT, tk.INDENT, tk.DEDENT, tk.NEWLINE):
             _type, _value, _pos_begin, _pos_end, __ = self.gt.next()
         
@@ -169,18 +169,18 @@ class DDLexer(object):
         
         return token
         
-    # ºó´¦Àí
+    # åå¤„ç†
     def _post_process(self, token):
         if token.type == tk.NAME:
             token.type = reserved.get(token.value.lower(), 'NAME')
         
         elif token.type == tk.OP:
             token.type = op_types[token.value]
-            print token
+           # print token
         
         else:
             token.type = token_types[token.type][0]
-            print token
+            #print token
 
         return
         
