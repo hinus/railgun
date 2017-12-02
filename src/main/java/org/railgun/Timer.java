@@ -28,9 +28,9 @@ public class Timer extends Thread {
             long duration = System.currentTimeMillis() - begin;
 
             // make sure only 50 frames per second
-            if (duration < 20) {
+            if (duration < 50) {
                 try {
-                    Thread.sleep(20 - duration);
+                    Thread.sleep(50 - duration);
                 } catch (InterruptedException e) {
                 }
             }

@@ -21,6 +21,10 @@ import org.railgun.vm.Interpreter;
 public class RunHandler implements EventHandler<ActionEvent> {
     @Override
     public void handle(ActionEvent event) {
+        Timer lastTimer = Controls.getInstance().getTimer();
+        if(lastTimer != null)
+            lastTimer.exit();
+
         Timer timer = new Timer();
         Controls.getInstance().setTimer(timer);
         timer.setDaemon(true);
@@ -80,5 +84,6 @@ public class RunHandler implements EventHandler<ActionEvent> {
         }
 
         Interpreter.getInstance().run(FileManager.getInstance().getBinaryContent());
+
     }
 }
