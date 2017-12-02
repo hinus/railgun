@@ -9,7 +9,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.railgun.action.*;
-import org.railgun.animation.TransitionController;
+//import org.railgun.animation.TransitionController;
 import org.railgun.marshal.BinaryFileParser;
 import org.railgun.shape.Circle;
 import org.railgun.shape.Rect;

@@ -13,9 +13,13 @@ public class Bytecode {
     static final byte BINARY_SUBSTRACT = 24;
 
     static final byte INPLACE_ADD = 55;
+    static final byte STORE_MAP = (byte) 54;
     static final byte INPLACE_SUBSTRACT = 56;
     static final byte INPLACE_MULTIPLY = 57;
     static final byte INPLACE_DIVIDE = 58;
+    static final byte STORE_SUBSCR = 60;
+
+    static final byte GET_ITER = 68;
 
     static final byte PRINT_ITEM = 71;
     static final byte PRINT_NEWLINE = 72;
@@ -23,13 +27,17 @@ public class Bytecode {
     static final byte RETURN_VALUE = 83;
     static final byte POP_BLOCK = 87;
 
+    // TODO: This is a separator
     static final byte HAVE_ARGUMENT = 90; /* Opcodes from here have an argument: */
 
     static final byte STORE_NAME = 90; /* Index in name list */
+    static final byte FOR_ITER = 93;
     static final byte STORE_ATTR = 95;  /* Index in name list */
     static final byte STORE_GLOBAL = 97;
     static final byte LOAD_CONST = 100; /* Index in const list */
     static final byte LOAD_NAME = 101; /* Index in name list */
+    static final byte BUILD_LIST = (byte) 103;
+    static final byte BUILD_MAP = (byte) 105;
     static final byte LOAD_ATTR = 106; /* Index in name list */
     static final byte COMPARE_OP = 107; /* Comparison operator */
     static final byte JUMP_ABSOLUTE = 113;
@@ -42,11 +50,6 @@ public class Bytecode {
 
     static final byte CALL_FUNCTION = (byte) 131;
     static final byte MAKE_FUNCTION = (byte) 132;
-
-    //new
-    static final byte STORE_MAP = (byte) 54;
-    static final byte BUILD_MAP = (byte) 105;
-    static final byte BUILD_LIST = (byte) 103;
 
     public static class COMPARE {
         static final byte LESS = 0;

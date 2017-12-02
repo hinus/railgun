@@ -89,7 +89,7 @@ public class Interpreter {
                 optarg = x86 ? (optArr[pc++] & 0xFF) : ((optArr[pc++] & 0xFF) + ((optArr[pc++] & 0xFF) << 8));
             }
             Integer lhs, rhs;
-            Object v, w, attr;
+            Object v, w, u, attr;
             switch (optcode) {
                 case Bytecode.POP_TOP:
                     stack.pop();
@@ -124,9 +124,9 @@ public class Interpreter {
                     }
                     break;
 
-                    // 57
+                // 57
                 case Bytecode.INPLACE_MULTIPLY:
-                    // 20
+                // 20
                 case Bytecode.BINARY_MULTIPLY:
                     rhs = (Integer) stack.pop();
                     lhs = (Integer) stack.pop();
@@ -134,7 +134,7 @@ public class Interpreter {
                     break;
                 // 58
                 case Bytecode.INPLACE_DIVIDE:
-                    // 21
+                // 21
                 case Bytecode.BINARY_DIVIDE:
                     rhs = (Integer) stack.pop();
                     lhs = (Integer) stack.pop();
@@ -142,7 +142,7 @@ public class Interpreter {
                     break;
                 // 55
                 case Bytecode.INPLACE_ADD:
-                    // 23
+                // 23
                 case Bytecode.BINARY_ADD:
                     rhs = (Integer) stack.pop();
                     lhs = (Integer) stack.pop();
@@ -155,6 +155,25 @@ public class Interpreter {
                     rhs = (Integer) stack.pop();
                     lhs = (Integer) stack.pop();
                     stack.push(lhs - rhs);
+                    break;
+                // 60
+                case Bytecode.STORE_SUBSCR:
+                    w = stack.pop();
+                    v = stack.pop();
+                    u = stack.pop();
+                    /* v[w] = u */
+                    if (v instanceof ArrayList) {
+                        ((ArrayList) v).set((Integer) w, u);
+                    } else if (v instanceof Map) {
+                        ((Map) v).put(w, u);
+                    }
+                    break;
+                // 68
+                case Bytecode.GET_ITER:
+                    v = stack.pop();
+                    if (v instanceof Iterable) {
+                        stack.push(((Iterable) v).iterator());
+                    }
                     break;
                 // 71
                 case Bytecode.PRINT_ITEM:
@@ -229,6 +248,18 @@ public class Interpreter {
                     namesTable.put(checkKeyMap, checkKeyMapObject);
 
                     break;
+                // 93
+                case Bytecode.FOR_ITER:
+                    v = stack.peek();
+                    if (v instanceof Iterator) {
+                        if (((Iterator) v).hasNext()) {
+                            stack.push(((Iterator) v).next());
+                        } else {
+                            pc += optarg;
+                            stack.pop();
+                        }
+                    }
+                    break;
                 // 116
                 case Bytecode.LOAD_GLOBAL:
                 // 101
@@ -247,6 +278,7 @@ public class Interpreter {
                 case Bytecode.LOAD_CONST:
                     stack.push(consts.get(optarg));
                     break;
+                // 106
                 case Bytecode.LOAD_ATTR:
                     v = stack.pop();
                     w = names.get(optarg);
@@ -380,9 +412,13 @@ public class Interpreter {
                 case Bytecode.MAKE_FUNCTION:
                     break;
                 case Bytecode.BUILD_LIST:
-                    ArrayList<Object> arr=new ArrayList<Object>();
+                    ArrayList<Object> arr = new ArrayList<>(optarg);
+                    Stack<Object> argsStack = new Stack<>();
                     for (int i = 0; i < optarg; ++i) {
-                        arr.add(stack.pop());
+                        argsStack.push(stack.pop());
+                    }
+                    for (int i = 0; i < optarg; ++i) {
+                        arr.add(argsStack.pop());
                     }
                     stack.push(arr);
                     break;
