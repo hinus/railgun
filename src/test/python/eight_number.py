@@ -8,38 +8,31 @@ board = [r, line1, line2, line3, line4]
 
 l = [2, 1, 0, 2, 3, 5, 4, 9, 8, 7]
 
-def onLeft():
-	if l[0] % 3 == 0:
+def move(dir):
+	if dir == 1 and l[0] % 3 == 0:
 		return
 	
-	l[l[0]] = l[l[0] + 1]
-	l[0] = l[0] + 1
+	if dir == -1 and l[0] % 3 == 1:
+		return
+		
+	if l[0] + dir < 1 or l[0] + dir > 9:
+		return
+		
+	l[l[0]] = l[l[0] + dir]
+	l[0] = l[0] + dir
 	l[l[0]] = 0
-	
+
+def onLeft():
+	move(1)
 	
 def onRight():
-	if l[0] % 3 == 1:
-		return
-		
-	l[l[0]] = l[l[0] - 1]
-	l[0] = l[0] - 1
-	l[l[0]] = 0
+	move(-1)
 	
 def onUp():
-	if l[0] >= 7:
-		return
-		
-	l[l[0]] = l[l[0] + 3]
-	l[0] = l[0] + 3
-	l[l[0]] = 0
+	move(3)
 	
 def onDown():
-	if l[0] <= 3:
-		return
-		
-	l[l[0]] = l[l[0] - 3]
-	l[0] = l[0] - 3
-	l[l[0]] = 0
+	move(-3)
 
 KeyMap = {
 	"VK_LEFT" : onLeft,
@@ -49,4 +42,17 @@ KeyMap = {
 }
 
 def update():
+	i = 1
+	while i <= 9:
+		if l[i] == 0:
+			i += 1
+			continue
+		
+		x = 250 + (i + 2) % 3 * 150
+		y = 150 + (i - 1) / 3 * 150
+		t = rgtext(l[i], x, y, "Arial Black", 24)
+		
+		print t
+		i += 1
+		
 	print board

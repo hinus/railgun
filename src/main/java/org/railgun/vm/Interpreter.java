@@ -123,12 +123,12 @@ public class Interpreter {
                     v = stack.pop();
                     if(stack.peek() instanceof ArrayList)
                     {
-                        ArrayList<Object> ar=(ArrayList<Object>)(stack.peek());
+                        ArrayList<Object> ar=(ArrayList<Object>)(stack.pop());
                         stack.push(ar.get((int)(v))) ;
                     }
                     else
                     {
-                        HashMap<Object, Object> mmap = (HashMap<Object, Object>) (stack.peek());
+                        HashMap<Object, Object> mmap = (HashMap<Object, Object>) (stack.pop());
                         stack.push(mmap.get(v));
                     }
                     break;
@@ -199,7 +199,7 @@ public class Interpreter {
                         View.getView().drawShape((Shape) printObject);
                     }
 
-                    System.out.print(printObject);
+                    //System.out.print(printObject);
                     break;
                 // 72
                 case Bytecode.PRINT_NEWLINE:
@@ -276,7 +276,8 @@ public class Interpreter {
                     String viariableName = (String)names.get(optarg);
 
                     if (viariableName.equals("circle") || viariableName.equals("rgb") || viariableName.equals("rgtext")
-                            || viariableName.equals("line") || viariableName.equals("roundrect")) {
+                            || viariableName.equals("line") || viariableName.equals("roundrect") ||
+                            viariableName.equals("rect") || viariableName.equals("star")) {
                         stack.push(viariableName);
                     }
                     else {
@@ -354,7 +355,8 @@ public class Interpreter {
                     String fastVarName = (String)varnames.get(optarg);
 
                     if (fastVarName.equals("circle") || fastVarName.equals("rgb") || fastVarName.equals("rgtext")
-                            || fastVarName.equals("line") || fastVarName.equals("roundrect")) {
+                            || fastVarName.equals("line") || fastVarName.equals("roundrect") ||
+                            fastVarName.equals("rect") || fastVarName.equals("star")) {
                         stack.push(fastVarName);
                     }
                     else {
@@ -386,7 +388,7 @@ public class Interpreter {
                             stack.push(Color.rgb((Integer)nextArgs[2], (Integer)nextArgs[1], (Integer)nextArgs[0]));
                         }
                         else if (funcName.equals("rgtext")) {
-                            stack.push(RGText.makeText((String)nextArgs[4], (Integer)nextArgs[3], (Integer)nextArgs[2],
+                            stack.push(RGText.makeText(nextArgs[4].toString(), (Integer)nextArgs[3], (Integer)nextArgs[2],
                                     (String)nextArgs[1], ((Integer)nextArgs[0]).doubleValue()));
                         }
                         else if (funcName.equals("line")) {
@@ -400,6 +402,18 @@ public class Interpreter {
                                     (Integer)nextArgs[4], (Integer)nextArgs[3],
                                     (Integer) nextArgs[2], (Integer)nextArgs[1],
                                     (Integer)nextArgs[0]));
+                        }
+                        else if (funcName.equals("rect")) {
+                            stack.push(Rect.makeRect((Integer)nextArgs[4],
+                                    (Integer)nextArgs[3],
+                                    ((Integer)nextArgs[2]).doubleValue(),
+                                    ((Integer)nextArgs[1]).doubleValue(),
+                                    true, (Color)nextArgs[0]));
+                        }
+                        else if (funcName.equals("star")) {
+                            stack.push(Star.makeStar((Integer)nextArgs[2],
+                                    (Integer)nextArgs[1],
+                                    ((Integer)nextArgs[0]).doubleValue()));
                         }
                     } else {
                         curFrame.pc = pc;
