@@ -36,12 +36,15 @@ public class Interpreter {
 
     private static boolean x86 = false;
 
+    private Interpreter() {
+        namesTable.put("True", Boolean.TRUE);
+        namesTable.put("False", Boolean.FALSE);
+    }
+
     public static Interpreter getInstance() {
         return instance;
     }
 
-    // Init stack trace
-    Stack<Frame> stackTrace = new Stack<>();
     // Global variable table
     private Map<String, Object> namesTable = new HashMap<>();
 
@@ -199,14 +202,13 @@ public class Interpreter {
                         View.getView().drawShape((Shape) printObject);
                     }
 
-                    //System.out.print(printObject);
                     break;
                 // 72
                 case Bytecode.PRINT_NEWLINE:
-                    System.out.println();
                     break;
                 // 83
                 case Bytecode.RETURN_VALUE:
+                    System.out.println(stackTrace.size());
                     if (! stackTrace.empty()) {
                         curFrame = stackTrace.pop();
                         curFrame.stack.push(stack.pop());

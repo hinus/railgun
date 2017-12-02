@@ -1,0 +1,2 @@
+co = compile("print a, b", "<string>", "exec")
+exec co in {'a' : 1}, {'b' : 2}

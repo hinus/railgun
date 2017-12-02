@@ -1,0 +1,1 @@
+set path=%path%;C:\Program Files (x86)\Git\bin;C:\Program Files (x86)\Python
