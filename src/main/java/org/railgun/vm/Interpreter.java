@@ -208,7 +208,6 @@ public class Interpreter {
                     break;
                 // 83
                 case Bytecode.RETURN_VALUE:
-                    System.out.println(stackTrace.size());
                     if (! stackTrace.empty()) {
                         curFrame = stackTrace.pop();
                         curFrame.stack.push(stack.pop());

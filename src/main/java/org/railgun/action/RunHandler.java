@@ -28,8 +28,10 @@ public class RunHandler implements EventHandler<ActionEvent> {
 
         FileManager fileManager = FileManager.getInstance();
         String binaryFileName = fileManager.getBinaryFileName();
-        if (binaryFileName == null) {
-            String cmd = "python D:\\hack\\ddl.py " + fileManager.getSourceFileName();
+        String sourceFileName = fileManager.getSourceFileName();
+        //if (binaryFileName == null) {
+        if (sourceFileName != null) {
+            String cmd = "\"C:\\Program Files (x86)\\Python27\\python\" D:\\hack\\ddl.py " + fileManager.getSourceFileName();
             try {
                 File file = new File("D:\\hack\\compile.bat");
                 if (file.exists()) {
@@ -37,15 +39,13 @@ public class RunHandler implements EventHandler<ActionEvent> {
                 }
                 file.createNewFile();
                 BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
-                bw.write("D:");
-                bw.newLine();
-                bw.write("cd hack");
+                bw.write("cd D:\\hack");
                 bw.newLine();
                 bw.write(cmd);
                 bw.newLine();
                 bw.close();
             } catch (Exception e) {
-                System.out.println("错误：" + e);
+                System.out.println("" + e);
             }
 
             Process p = null;
