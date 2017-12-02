@@ -5,9 +5,7 @@
 # author : gzxuwei@corp.netease.com
 # date : 2013-11-03
 # -----------------------------------------------------------------------------
-import marshal
-import py_compile
-import time
+
 import sys, ast
 sys.path.insert(0,"./ddlib")
 
@@ -24,7 +22,6 @@ tokens = (
 	'ENDMARKER',
 	'STRING',
 	
-	'TAG_DRAW',
 	'TAG_CLASS',
 	'TAG_DEF',
 	'TAG_LAMBDA',
@@ -41,7 +38,7 @@ tokens = (
 	'TAG_EXCEPT',
 	'TAG_FINALLY',
 	
-	#'TAG_PRINT',
+	'TAG_DRAW',
 	'TAG_PASS',
 	'TAG_DEL',
 	'TAG_BREAK',
@@ -157,17 +154,10 @@ def p_file_input(p):
 
 		p[0] = ast.Module(p[1], lineno = item.lineno, col_offset = item.col_offset)
 		print ast.dump(p[0])
-	codeobject = compile(p[0], '<string>', 'exec')
-	with open('output.rgb', 'wb') as fc:
-		fc.write('\0\0\0\0')
-		py_compile.wr_long(fc, long(time.time()))
-		marshal.dump(codeobject, fc)
-		fc.flush()
-		fc.seek(0, 0)
-		fc.write(py_compile.MAGIC)
+
 	if not _debug:
 		co = compile(p[0], exec_file, 'exec')
-		#exec co
+		exec co
 
 	return
 	
@@ -390,6 +380,17 @@ def p_factor(p):
 
 	if len(p) == 2:
 		p[0] = p[1]
+		
+	else:
+		item = p.get_item(1)
+		if p[1] == "+":
+			p[0] = ast.UnaryOp(op = ast.UAdd(), operand = p[2], lineno = item.lineno, col_offset = item.lexpos)
+		
+		elif p[1] == "-":
+			p[0] = ast.UnaryOp(op = ast.USub(), operand = p[2], lineno = item.lineno, col_offset = item.lexpos)
+		
+		elif p[1] == "~":
+			p[0] = ast.UnaryOp(op = ast.Invert(), operand = p[2], lineno = item.lineno, col_offset = item.lexpos)
 			
 	return
 	
@@ -459,8 +460,6 @@ def p_trailers(p):
 			
 	return
 	
-
-
 def p_trailer(p):
 	'''trailer : "(" ")"
 			| "(" arglist ")"
@@ -732,8 +731,8 @@ def p_testlist(p):
 	
 def p_testlist_anns(p):
 	'''testlist_anns : testlist_anns "," test
-			| test '''
-
+			| test'''
+			
 	if len(p) == 2:
 		p[0] = p[1]
 
@@ -762,6 +761,9 @@ def p_or_test(p):
 			
 	if len(p) == 2:
 		p[0] = p[1]
+	
+	else:
+		p[0] = ast.BoolOp(op = ast.Or(), values = [p[1], p[3]], lineno = p[1].lineno, col_offset = p[1].col_offset)
 
 	return
 	
@@ -771,6 +773,9 @@ def p_and_test(p):
 			
 	if len(p) == 2:
 		p[0] = p[1]
+	
+	else:
+		p[0] = ast.BoolOp(op = ast.And(), values = [p[1], p[3]], lineno = p[1].lineno, col_offset = p[1].col_offset)
 
 	return
 	
@@ -780,6 +785,9 @@ def p_not_test(p):
 			
 	if len(p) == 2:
 		p[0] = p[1]
+		
+	else:
+		p[0] = ast.UnaryOp(op = ast.Not(), operand = p[3])
 
 	return
 	
@@ -918,19 +926,11 @@ def p_fplist(p):
 			| fplist_top ","'''
 	
 	return
-
-def p_trailerx(p):
-	'''trailerx : arglist'''
-
-	p[0] = ast.Call(func = None, args = [], keywords = [], starargs = None, kwargs = None, lineno = 0, col_offset = 0)
-	p[0].args = p[1]
-
-	return
 	
-
 	
 def p_funcdef(p):
 	'''funcdef : TAG_DEF NAME parameters suite'''
+
 	p[0] = ast.FunctionDef(name = p[2], args = p[3], body = p[4], decorator_list = [], lineno = p.get_item(1).lineno, col_offset = p.get_item(1).lexpos)
 
 	return
@@ -949,12 +949,13 @@ def p_parameters(p):
 def p_suite(p):
 	'''suite : simple_stmt
 			| INDENT stmts DEDENT'''
+
 	if len(p) == 2:
 		p[0] = p[1]
 
 	else:
 		p[0] = p[2]
-
+			
 	return
 	
 def p_testlist_safe_piece(p):
@@ -1017,57 +1018,57 @@ def p_compound_stmt(p):
 	return
 	
 def p_if_stmt(p):
-	'''if_stmt : TAG_IF test suite
-			| TAG_IF test suite TAG_ELSE suite
-			| TAG_IF test suite elif_list
-			| TAG_IF test suite elif_list TAG_ELSE suite'''
+	'''if_stmt : TAG_IF "(" test ")" suite
+			| TAG_IF "(" test ")" suite TAG_ELSE suite
+			| TAG_IF "(" test ")" suite elif_list
+			| TAG_IF "(" test ")" suite elif_list TAG_ELSE suite'''
 			
 	this_orelse = []
-	if len(p) == 6:
-		this_orelse = p[5]
-
-	elif len(p) == 5:
-		this_orelse = [p[4],]
+	if len(p) == 8:
+		this_orelse = p[7]
 
 	elif len(p) == 7:
-		this_orelse = [p[4],]
+		this_orelse = [p[6],]
 
-		item = p[4]
+	elif len(p) == 9:
+		this_orelse = [p[6],]
+
+		item = p[6]
 		while len(item.orelse) > 0 and isinstance(item.orelse[0], ast.If):
 			item = item.orelse[0]
 
-		item.orelse = p[7]
+		item.orelse = p[8]
 
-	p[0] = ast.If(test = p[2], body = p[3], orelse = this_orelse, 
+	p[0] = ast.If(test = p[3], body = p[5], orelse = this_orelse, 
 		lineno = p.get_item(1).lineno, col_offset = p.get_item(1).lexpos)
 
 	return
 	
 def p_while_stmt(p):
-	'''while_stmt : TAG_WHILE test suite
-			| TAG_WHILE test suite TAG_ELSE suite'''
+	'''while_stmt : TAG_WHILE "(" test ")" suite
+			| TAG_WHILE "(" test ")" suite TAG_ELSE suite'''
 	
-	p[0] = ast.While(test = p[2], body = p[3], orelse = [], lineno = p.get_item(1).lineno, col_offset = p.get_item(1).lexpos)
+	p[0] = ast.While(test = p[3], body = p[5], orelse = [], lineno = p.get_item(1).lineno, col_offset = p.get_item(1).lexpos)
 
-	if len(p) == 6:
-		p[0].orelse = p[5]
+	if len(p) == 8:
+		p[0].orelse = p[7]
 
 	return
 	
 def p_for_stmt(p):
-	'''for_stmt : TAG_FOR exprlist TAG_IN testlist suite
-			| TAG_FOR exprlist TAG_IN testlist suite TAG_ELSE suite'''
+	'''for_stmt : TAG_FOR exprlist TAG_IN testlist ":" suite
+			| TAG_FOR exprlist TAG_IN testlist ":" suite TAG_ELSE ":" suite'''
 	
-	if len(p) == 6:
+	if len(p) == 7:
 		this_orelse = []
 
-	elif len(p) == 8:
-		this_orelse = p[7]
+	elif len(p) == 10:
+		this_orelse = p[9]
 
 	set_context(p[2], ast.Store())
 
 	p[0] = ast.For(target = p[2], iter = p[4],
-		body = p[5], orelse = this_orelse,
+		body = p[6], orelse = this_orelse,
 		lineno = p.get_item(1).lineno,
 		col_offset = p.get_item(1).lexpos)
 	
@@ -1127,16 +1128,15 @@ def p_simple_stmt(p):
 	
 def p_small_stmt(p):
 	'''small_stmt : expr_stmt
-
+			| print_stmt
 			| del_stmt
 			| pass_stmt
 			| flow_stmt
 			| import_stmt
 			| global_stmt
 			| exec_stmt
-			| assert_stmt
-			| draw_stmt'''
-#			| print_stmt			
+			| assert_stmt'''
+			
 	p[0] = p[1]
 
 	return
@@ -1204,8 +1204,8 @@ def p_expr_stmt_bottom(p):
 	return
 
 
-def p_draw_stmt(p):
-	'''draw_stmt : TAG_DRAW
+def p_print_stmt(p):
+	'''print_stmt : TAG_DRAW
 			| TAG_DRAW testlist'''
 			
 	if len(p) == 3:
@@ -1454,7 +1454,6 @@ yacc.yacc()
 
 def run(fileName):
 	exec_file = fileName
-
 	try:
 		f = open(fileName)
 	except EOFError, IOError:
