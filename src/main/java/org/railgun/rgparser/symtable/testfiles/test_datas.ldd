@@ -1,0 +1,13 @@
+#l = [(x, y) for x in range(10) if x % 2 == 0 for y in range(x)]
+#print l
+
+#a = 1
+#b = 2
+#del a, b
+#
+
+#from traceback import print_stack as ps
+#ps()
+
+from sys import *
+print flags

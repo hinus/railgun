@@ -1,0 +1,14 @@
+class TestObject(object):
+	def __init__(self):
+		self.a = 1
+		self.b = 2
+		print "in constructor"
+
+	def sayHello(self):
+		self.a += 1
+		self.b += self.a
+		print "hello", self.a, self.b
+
+a = TestObject()
+a.sayHello()
+a.sayHello()

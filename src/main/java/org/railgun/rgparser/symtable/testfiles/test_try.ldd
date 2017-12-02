@@ -1,0 +1,16 @@
+#raise SyntaxError, "hahaha"
+#
+#try:
+#	print 1
+#
+#except ZeroDivisionError, e:
+#	print "find an z error"
+#
+#except NameError, ne:
+#	print "find an a error"
+#
+#else:
+#	print "no error"
+
+assert True
+assert False

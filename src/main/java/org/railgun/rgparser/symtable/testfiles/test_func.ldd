@@ -1,0 +1,30 @@
+#def f((a, (b, c)) = (3, (4, 5))):
+#	t = a
+#	print t
+#	return t
+
+#i = 1
+#def get_func():
+#	t = 3
+#	def func():
+#		print i, t
+#
+#	return func
+#
+#f = get_func()
+#n = f()
+
+l = []
+
+def get_f():
+	for i in range(10):
+		#f = lambda a, b = i: a + b
+		f = lambda a: a + i
+		
+		l.append(f)
+
+
+get_f()
+for f in l:
+	print f(1)
+
