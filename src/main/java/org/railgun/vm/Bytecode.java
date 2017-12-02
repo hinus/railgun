@@ -7,6 +7,7 @@ public class Bytecode {
     static final byte DUP_TOP = 4;
     static final byte UNARY_NEGATIVE = 11;
     static final byte BINARY_MULTIPLY = 20;
+    static final byte BINARY_MODULO = 22;
     static final byte BINARY_SUBSCR = (byte) 25;
     static final byte BINARY_DIVIDE = 21;
     static final byte BINARY_ADD = 23;
@@ -17,6 +18,7 @@ public class Bytecode {
     static final byte INPLACE_SUBSTRACT = 56;
     static final byte INPLACE_MULTIPLY = 57;
     static final byte INPLACE_DIVIDE = 58;
+    static final byte INPLACE_MODULO = 59;
     static final byte STORE_SUBSCR = 60;
 
     static final byte GET_ITER = 68;
@@ -24,6 +26,7 @@ public class Bytecode {
     static final byte PRINT_ITEM = 71;
     static final byte PRINT_NEWLINE = 72;
 
+    static final byte BREAK_LOOP = 80;
     static final byte RETURN_VALUE = 83;
     static final byte POP_BLOCK = 87;
 
@@ -40,6 +43,7 @@ public class Bytecode {
     static final byte BUILD_MAP = (byte) 105;
     static final byte LOAD_ATTR = 106; /* Index in name list */
     static final byte COMPARE_OP = 107; /* Comparison operator */
+    static final byte JUMP_FORWARD = 110; /* Number of bytes to skip */
     static final byte JUMP_ABSOLUTE = 113;
     static final byte POP_JUMP_IF_FALSE = 114;
     static final byte POP_JUMP_IF_TRUE = 115;

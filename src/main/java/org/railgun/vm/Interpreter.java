@@ -109,6 +109,15 @@ public class Interpreter {
                     v = stack.pop();
                     stack.push(-((Integer)v).intValue());
                     break;
+                // 59
+                case Bytecode.INPLACE_MODULO:
+                // 22
+                case Bytecode.BINARY_MODULO:
+                    v = stack.pop();
+                    w = stack.pop();
+                    /* w % v */
+                    stack.push(((Integer)w) % ((Integer)v));
+                    break;
                 // 25
                 case Bytecode.BINARY_SUBSCR:
                     v = stack.pop();
@@ -318,6 +327,10 @@ public class Interpreter {
                             stack.push(lhs >= rhs);
                             break;
                     }
+                    break;
+                // 110
+                case Bytecode.JUMP_FORWARD:
+                    pc += optarg;
                     break;
                 // 113
                 case Bytecode.JUMP_ABSOLUTE:
