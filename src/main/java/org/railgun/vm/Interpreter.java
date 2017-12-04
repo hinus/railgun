@@ -76,6 +76,22 @@ public class Interpreter {
         interpret(baseFrame, new Stack<>());
     }
 
+    // Run code object with arguments
+    public void run (CodeObject co, Object ... args) {
+        // Construct base frame
+        Frame baseFrame = new Frame(co.consts, co.names, co.varnames, co.bytecodes, new Stack<>(), 0);
+
+        assert args.length == co.argcount;
+
+        // Construct arguments
+        for (int i = 0; i < co.argcount; ++i) {
+            baseFrame.varnamesTable.put((String) co.varnames.get(i), args[i]);
+        }
+
+        // Interpret current frame
+        interpret(baseFrame, new Stack<>());
+    }
+
     // Interpret Instructions
     void interpret (Frame curFrame, Stack<Frame> stackTrace) {
         // Program Counter
@@ -233,6 +249,7 @@ public class Interpreter {
                     }
                     break;
 
+                // TODO: Have Argument
                 // 95
                 case Bytecode.STORE_ATTR:
                     v = stack.pop();
@@ -251,7 +268,6 @@ public class Interpreter {
 
                     break;
 
-                // TODO: Have Argument
                 // 97
                 case Bytecode.STORE_GLOBAL:
                 // 90
