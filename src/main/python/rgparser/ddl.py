@@ -19,8 +19,6 @@ exec_file = ''
 _debug = False
 
 tokens = (
-	'DEDENT',
-	'INDENT',
 	'NEWLINE',
 	'ENDMARKER',
 	'STRING',
@@ -158,13 +156,16 @@ def p_file_input(p):
 		p[0] = ast.Module(p[1], lineno = item.lineno, col_offset = item.col_offset)
 		print ast.dump(p[0])
 	codeobject = compile(p[0], '<string>', 'exec')
-	with open('output.rgb', 'wb') as fc:
+	print exec_file
+	with open(exec_file + 'b', 'wb') as fc:
+		print exec_file
 		fc.write('\0\0\0\0')
 		py_compile.wr_long(fc, long(time.time()))
 		marshal.dump(codeobject, fc)
 		fc.flush()
 		fc.seek(0, 0)
 		fc.write(py_compile.MAGIC)
+		
 	if not _debug:
 		co = compile(p[0], exec_file, 'exec')
 		#exec co
@@ -797,7 +798,7 @@ def p_not_test(p):
 		p[0] = p[1]
 		
 	else:
-		p[0] = ast.UnaryOp(op = ast.Not(), operand = p[2])
+		p[0] = ast.UnaryOp(op = ast.Not(), operand = p[2], lineno = p.get_item(1).lineno, col_offset = p.get_item(1).lexpos)
 
 	return
 	
@@ -957,8 +958,7 @@ def p_parameters(p):
 	return
 	
 def p_suite(p):
-	'''suite : simple_stmt
-			| INDENT stmts DEDENT'''
+	'''suite : "{" stmts "}"'''
 
 	if len(p) == 2:
 		p[0] = p[1]
@@ -1463,6 +1463,7 @@ yacc.PY_FLAG = True
 yacc.yacc()
 
 def run(fileName):
+	global exec_file
 	exec_file = fileName
 	try:
 		f = open(fileName)

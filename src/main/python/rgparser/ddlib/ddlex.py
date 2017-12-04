@@ -132,21 +132,8 @@ class DDLexer(object):
         while _type in (tk.NL, tk.COMMENT, tk.INDENT, tk.DEDENT, tk.NEWLINE):
             _type, _value, _pos_begin, _pos_end, __ = self.gt.next()
         
-        if _type == tk.OP and _value == '{':
-            token = LexToken()
-            token.type = tk.INDENT
-            token.value = _value
-            token.lineno = _pos_begin[0]
-            token.lexpos = _pos_begin[1]
 
-        elif _type == tk.OP and _value == '}':
-            token = LexToken()
-            token.type = tk.DEDENT
-            token.value = _value
-            token.lineno = _pos_begin[0]
-            token.lexpos = _pos_begin[1]
-
-        elif _type == tk.OP and _value == ';':
+        if _type == tk.OP and _value == ';':
             token = LexToken()
             token.type = tk.NEWLINE
             token.value = _value
