@@ -6,6 +6,7 @@ import org.railgun.canvas.View;
 import org.railgun.marshal.BinaryFileParser;
 import org.railgun.marshal.CodeObject;
 import org.railgun.shape.*;
+import org.railgun.vm.intrisinc.*;
 
 import java.util.*;
 
@@ -39,6 +40,16 @@ public class Interpreter {
     private Interpreter() {
         namesTable.put("True", Boolean.TRUE);
         namesTable.put("False", Boolean.FALSE);
+
+        namesTable.put("circle", new CircleMethod());
+        namesTable.put("rgb", new RgbMethod());
+
+        namesTable.put("line", new RGLineMethod());
+        namesTable.put("roundrect", new RGRoundRectMethod());
+        namesTable.put("rect", new RGRectMethod());
+
+        namesTable.put("rgtext", new RGTextMethod());
+        namesTable.put("star", new StarMethod());
     }
 
     public static Interpreter getInstance() {
@@ -274,16 +285,7 @@ public class Interpreter {
                 case Bytecode.LOAD_GLOBAL:
                 // 101
                 case Bytecode.LOAD_NAME:
-                    String viariableName = (String)names.get(optarg);
-
-                    if (viariableName.equals("circle") || viariableName.equals("rgb") || viariableName.equals("rgtext")
-                            || viariableName.equals("line") || viariableName.equals("roundrect") ||
-                            viariableName.equals("rect") || viariableName.equals("star")) {
-                        stack.push(viariableName);
-                    }
-                    else {
-                        stack.push(namesTable.get(viariableName));
-                    }
+                    stack.push(namesTable.get(names.get(optarg)));
                     break;
                 // 100
                 case Bytecode.LOAD_CONST:
@@ -353,16 +355,7 @@ public class Interpreter {
                     break;
                 // 124
                 case Bytecode.LOAD_FAST:
-                    String fastVarName = (String)varnames.get(optarg);
-
-                    if (fastVarName.equals("circle") || fastVarName.equals("rgb") || fastVarName.equals("rgtext")
-                            || fastVarName.equals("line") || fastVarName.equals("roundrect") ||
-                            fastVarName.equals("rect") || fastVarName.equals("star")) {
-                        stack.push(fastVarName);
-                    }
-                    else {
-                        stack.push(varnamesTable.get(fastVarName));
-                    }
+                    stack.push(varnamesTable.get(varnames.get(optarg)));
                     break;
                 // 125
                 case Bytecode.STORE_FAST:
@@ -377,45 +370,8 @@ public class Interpreter {
                     }
                     Object o = stack.pop();
 
-                    if (o instanceof String) {
-                        String funcName = (String) o;
-                        if (funcName.equals("circle")) {
-                            stack.push(Circle.makeCircle((Integer) nextArgs[3],
-                                    (Integer)nextArgs[2],
-                                    ((Integer) nextArgs[1]).doubleValue(),
-                                    (Color)nextArgs[0]));
-                        }
-                        else if (funcName.equals("rgb")) {
-                            stack.push(Color.rgb((Integer)nextArgs[2], (Integer)nextArgs[1], (Integer)nextArgs[0]));
-                        }
-                        else if (funcName.equals("rgtext")) {
-                            stack.push(RGText.makeText(nextArgs[4].toString(), (Integer)nextArgs[3], (Integer)nextArgs[2],
-                                    (String)nextArgs[1], ((Integer)nextArgs[0]).doubleValue()));
-                        }
-                        else if (funcName.equals("line")) {
-                            stack.push(new RGLine((Integer) nextArgs[3],
-                                    (Integer)nextArgs[2],
-                                    (Integer) nextArgs[1],
-                                    (Integer)nextArgs[0]));
-                        }
-                        else if (funcName.equals("roundrect")) {
-                            stack.push(RGRoundRect.makeRoundRect((Integer) nextArgs[5],
-                                    (Integer)nextArgs[4], (Integer)nextArgs[3],
-                                    (Integer) nextArgs[2], (Integer)nextArgs[1],
-                                    (Integer)nextArgs[0]));
-                        }
-                        else if (funcName.equals("rect")) {
-                            stack.push(Rect.makeRect((Integer)nextArgs[4],
-                                    (Integer)nextArgs[3],
-                                    ((Integer)nextArgs[2]).doubleValue(),
-                                    ((Integer)nextArgs[1]).doubleValue(),
-                                    true, (Color)nextArgs[0]));
-                        }
-                        else if (funcName.equals("star")) {
-                            stack.push(Star.makeStar((Integer)nextArgs[2],
-                                    (Integer)nextArgs[1],
-                                    ((Integer)nextArgs[0]).doubleValue()));
-                        }
+                    if (o instanceof InnerMethod) {
+                        stack.push(((InnerMethod)o).call(nextArgs));
                     } else {
                         curFrame.pc = pc;
                         stackTrace.push(curFrame);
