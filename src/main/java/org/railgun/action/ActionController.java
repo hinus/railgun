@@ -12,6 +12,8 @@ public class ActionController {
 
     private HashMap keyMap = new HashMap<>();
 
+    private HashMap mouseMap = new HashMap();
+
     private CodeObject updateFunction;
 
     public CodeObject getUpdateFunction() {
@@ -35,5 +37,13 @@ public class ActionController {
 
     public static ActionController getActionController() {
         return actionController;
+    }
+
+    public HashMap getMouseMap() {
+        return mouseMap;
+    }
+
+    public void setMouseMap(HashMap mouseMap) {
+        this.mouseMap = mouseMap;
     }
 }

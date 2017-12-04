@@ -1,7 +1,10 @@
 package org.railgun.vm;
 
 import javafx.scene.paint.Color;
+import org.railgun.Controls;
 import org.railgun.action.ActionController;
+import org.railgun.action.MouseDragHandler;
+import org.railgun.action.MouseLeftClickedHandler;
 import org.railgun.canvas.View;
 import org.railgun.marshal.BinaryFileParser;
 import org.railgun.marshal.CodeObject;
@@ -50,6 +53,8 @@ public class Interpreter {
 
         namesTable.put("rgtext", new RGTextMethod());
         namesTable.put("star", new StarMethod());
+
+        namesTable.put("random", new RandomMethod());
     }
 
     public static Interpreter getInstance() {
@@ -272,17 +277,22 @@ public class Interpreter {
                 case Bytecode.STORE_GLOBAL:
                 // 90
                 case Bytecode.STORE_NAME:
-                    String checkKeyMap = (String)names.get(optarg);
-                    Object checkKeyMapObject = stack.pop();
+                    String strV = (String)names.get(optarg);
+                    w = stack.pop();
 
-                    if (checkKeyMap.equals("KeyMap")) {
-                        ActionController.getActionController().setKeyMap((HashMap) checkKeyMapObject);
+                    if (strV.equals("KeyMap")) {
+                        ActionController.getActionController().setKeyMap((HashMap) w);
                     }
-                    else if (checkKeyMap.equals("update") && checkKeyMapObject instanceof CodeObject) {
-                        ActionController.getActionController().setUpdateFunction((CodeObject)checkKeyMapObject);
+                    else if (strV.equals("MouseMap")) {
+                        ActionController.getActionController().setMouseMap((HashMap) w);
+                        Controls.getInstance().getCanvas().setOnMousePressed(new MouseLeftClickedHandler());
+                        Controls.getInstance().getCanvas().setOnMouseDragOver(new MouseDragHandler());
+                    }
+                    else if (strV.equals("update") && w instanceof CodeObject) {
+                        ActionController.getActionController().setUpdateFunction((CodeObject)w);
                     }
 
-                    namesTable.put(checkKeyMap, checkKeyMapObject);
+                    namesTable.put(strV, w);
 
                     break;
                 // 93
