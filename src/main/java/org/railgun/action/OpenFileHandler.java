@@ -14,6 +14,8 @@ import java.io.*;
  * Created by hinus on 2017/11/30.
  */
 public class OpenFileHandler implements EventHandler<ActionEvent> {
+    private File initialDirectory = null;
+
     @Override
     public void handle(ActionEvent event) {
         Stage mainStage = Controls.getInstance().getMainStage();
@@ -31,6 +33,8 @@ public class OpenFileHandler implements EventHandler<ActionEvent> {
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Source File");
+        if (initialDirectory != null)
+            fileChooser.setInitialDirectory(initialDirectory);
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("RailGun Source File", "*.rg"));
 
@@ -41,6 +45,8 @@ public class OpenFileHandler implements EventHandler<ActionEvent> {
         }
 
         String sourceFileName = selectedFile.getAbsolutePath();
+
+        initialDirectory = selectedFile.getParentFile();
 
         fileManager.setSourceFileName(sourceFileName);
 

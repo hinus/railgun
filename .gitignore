@@ -1,4 +1,8 @@
 *.class
+*.rgb
+*.pyc
+*.out
+
 
 */.idea/*
 
