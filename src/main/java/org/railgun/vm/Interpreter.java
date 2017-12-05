@@ -2,9 +2,7 @@ package org.railgun.vm;
 
 import javafx.scene.paint.Color;
 import org.railgun.Controls;
-import org.railgun.action.ActionController;
-import org.railgun.action.MouseDragHandler;
-import org.railgun.action.MouseLeftClickedHandler;
+import org.railgun.action.*;
 import org.railgun.canvas.View;
 import org.railgun.marshal.BinaryFileParser;
 import org.railgun.marshal.CodeObject;
@@ -286,7 +284,9 @@ public class Interpreter {
                     else if (strV.equals("MouseMap")) {
                         ActionController.getActionController().setMouseMap((HashMap) w);
                         Controls.getInstance().getCanvas().setOnMousePressed(new MouseLeftClickedHandler());
-                        Controls.getInstance().getCanvas().setOnMouseDragOver(new MouseDragHandler());
+                        Controls.getInstance().getCanvas().setOnMouseDragEntered(new MouseDragEnterHandler());
+                        Controls.getInstance().getCanvas().setOnMouseDragged(new MouseDragHandler());
+                        Controls.getInstance().getCanvas().setOnMouseDragReleased(new MouseDragReleaseHandler());
                     }
                     else if (strV.equals("update") && w instanceof CodeObject) {
                         ActionController.getActionController().setUpdateFunction((CodeObject)w);

@@ -14,6 +14,8 @@ import java.io.*;
  * Created by hinus on 2017/12/1.
  */
 public class OpenBinaryHandler implements EventHandler<ActionEvent> {
+    private File initialDirectory = null;
+
     @Override
     public void handle(ActionEvent event) {
         Stage mainStage = Controls.getInstance().getMainStage();
@@ -29,6 +31,8 @@ public class OpenBinaryHandler implements EventHandler<ActionEvent> {
 
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Binary File");
+        if (initialDirectory != null)
+            fileChooser.setInitialDirectory(initialDirectory);
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("RailGun Binary File", "*.rgb"));
 
@@ -39,6 +43,8 @@ public class OpenBinaryHandler implements EventHandler<ActionEvent> {
         }
 
         String sourceFileName = selectedFile.getAbsolutePath();
+
+        initialDirectory = selectedFile.getParentFile();
 
         fileManager.setBinaryFileName(sourceFileName);
 

@@ -11,9 +11,9 @@ import java.util.HashMap;
 /**
  * Created by hinus on 2017/12/5.
  */
-public class MouseDragHandler implements EventHandler<MouseDragEvent> {
+public class MouseDragHandler implements EventHandler<MouseEvent> {
     @Override
-    public void handle(MouseDragEvent event) {
+    public void handle(MouseEvent event) {
         HashMap mouseMap = ActionController.getActionController().getMouseMap();
 
         if (mouseMap == null || mouseMap.isEmpty())
