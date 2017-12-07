@@ -2,11 +2,19 @@ package org.railgun;
 
 import com.sun.org.apache.xpath.internal.operations.Mod;
 import javafx.application.Application;
+import javafx.scene.Group;
+import javafx.scene.PerspectiveCamera;
 import javafx.scene.Scene;
+import javafx.scene.SubScene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.PhongMaterial;
+import javafx.scene.shape.Box;
+import javafx.scene.shape.DrawMode;
+import javafx.scene.transform.Rotate;
+import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import org.railgun.action.*;
 //import org.railgun.animation.TransitionController;
@@ -33,16 +41,36 @@ public class RailGun extends Application {
         Controls controlsManager = Controls.getInstance();
         controlsManager.setMainStage(primaryStage);
 
-
         // initialize canvas
         BorderPane mainPane = new BorderPane();
-        Canvas canvas = new Canvas(1000, 600);
-        mainPane.setCenter(canvas);
-        Controls.getInstance().setCanvas(canvas);
+        boolean is2d = true;
+        Scene scene = null;
 
-        Scene scene = new Scene(mainPane, 1000, 750);
+        if (is2d) {
+            Canvas canvas = new Canvas(1000, 600);
+            mainPane.setCenter(canvas);
+            Controls.getInstance().setCanvas(canvas);
+
+            scene = new Scene(mainPane, 1000, 750);
+        }
+        else {
+            // test 3d
+            Box testBox = new Box(5, 5, 5);
+            testBox.setMaterial(new PhongMaterial(Color.BROWN));
+            testBox.setDrawMode(DrawMode.FILL);
+
+            Group root = new Group();
+            root.getChildren().add(testBox);
+
+            SubScene subScene = new SubScene(root, 1000, 600);
+            Controls.getInstance().setGraph3d(root);
+
+            mainPane.setCenter(subScene);
+
+            scene = new Scene(mainPane, 1000, 750);
+        }
+
         scene.setOnKeyPressed(new KeyPressedHandler());
-
         controlsManager.setMainPane(mainPane);
 
         createMenu(mainPane, primaryStage);

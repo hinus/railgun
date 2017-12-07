@@ -9,6 +9,8 @@ import org.railgun.marshal.CodeObject;
 import org.railgun.shape.*;
 import org.railgun.vm.intrisinc.*;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 
 public class Interpreter {
@@ -53,6 +55,11 @@ public class Interpreter {
         namesTable.put("star", new StarMethod());
 
         namesTable.put("random", new RandomMethod());
+        namesTable.put("camera", new CameraMethod());
+
+        namesTable.put("setKeyMap", new KeyMapMethod());
+        namesTable.put("setMouseMap", new MouseMapMethod());
+        namesTable.put("setUpdate", new UpdateFunctionMethod());
     }
 
     public static Interpreter getInstance() {
@@ -277,21 +284,6 @@ public class Interpreter {
                 case Bytecode.STORE_NAME:
                     String strV = (String)names.get(optarg);
                     w = stack.pop();
-
-                    if (strV.equals("KeyMap")) {
-                        ActionController.getActionController().setKeyMap((HashMap) w);
-                    }
-                    else if (strV.equals("MouseMap")) {
-                        ActionController.getActionController().setMouseMap((HashMap) w);
-                        Controls.getInstance().getCanvas().setOnMousePressed(new MouseLeftClickedHandler());
-                        Controls.getInstance().getCanvas().setOnMouseDragEntered(new MouseDragEnterHandler());
-                        Controls.getInstance().getCanvas().setOnMouseDragged(new MouseDragHandler());
-                        Controls.getInstance().getCanvas().setOnMouseDragReleased(new MouseDragReleaseHandler());
-                    }
-                    else if (strV.equals("update") && w instanceof CodeObject) {
-                        ActionController.getActionController().setUpdateFunction((CodeObject)w);
-                    }
-
                     namesTable.put(strV, w);
 
                     break;
@@ -328,6 +320,14 @@ public class Interpreter {
                         }
                         else if (((String)w).equals("y")) {
                             stack.push(((Shape)v).getY());
+                        }
+                    }
+                    else {
+                        try {
+                            Method method = v.getClass().getMethod((String)w, double.class);
+                            stack.push(method);
+                        } catch (NoSuchMethodException e) {
+                            e.printStackTrace();
                         }
                     }
                     break;
@@ -398,7 +398,17 @@ public class Interpreter {
 
                     if (o instanceof InnerMethod) {
                         stack.push(((InnerMethod)o).call(nextArgs));
-                    } else {
+                    }
+                    else if (o instanceof Method) {
+                        try {
+                            stack.push(((Method)o).invoke(Controls.getInstance().getCamera(), nextArgs));
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        } catch (InvocationTargetException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    else {
                         curFrame.pc = pc;
                         stackTrace.push(curFrame);
                         CodeObject co = (CodeObject) o;

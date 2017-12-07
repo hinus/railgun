@@ -26,28 +26,12 @@ def move(dir) {
 	l[l[0]] = 0;
 }
 
-def onLeft() {
-	move(1);
-}
-	
-def onRight() {
-	move(-1);
-}
-	
-def onUp() {
-	move(3);
-}
-	
-def onDown() {
-	move(-3);
-}
-
-KeyMap = {
-	"VK_LEFT" : onLeft,
-	"VK_RIGHT" : onRight,
-	"VK_UP" : onUp,
-	"VK_DOWN" : onDown,
-};
+setKeyMap({
+	"VK_LEFT" : (lambda : move(1)),
+	"VK_RIGHT" : (lambda : move(-1)),
+	"VK_UP" : (lambda : move(3)),
+	"VK_DOWN" : (lambda : move(-3)),
+});
 
 def isWin() {
     i = 0;
@@ -78,7 +62,6 @@ def update() {
             draw t;
             i += 1;
 		}
-                        
         draw board;
 	}
     else {
@@ -86,3 +69,5 @@ def update() {
         draw t;
 	}
 }
+
+setUpdate(update);

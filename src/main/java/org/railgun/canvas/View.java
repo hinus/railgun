@@ -18,8 +18,10 @@ public class View {
 
     private View(Canvas canvas) {
         this.canvas = canvas;
-        this.graph = canvas.getGraphicsContext2D();
-        this.graph.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        if (canvas != null) {
+            this.graph = canvas.getGraphicsContext2D();
+            this.graph.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        }
     }
 
     public static View getView() {
@@ -38,6 +40,9 @@ public class View {
     }
 
     public void clear() {
+        if (this.graph == null)
+            return;
+
         this.graph.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
     }
 }

@@ -1,5 +1,8 @@
 package org.railgun;
 
+import javafx.scene.Camera;
+import javafx.scene.Group;
+import javafx.scene.SubScene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
@@ -14,6 +17,17 @@ public class Controls {
     private TextArea sourceCode;
     private Stage mainStage;
     private BorderPane mainPane;
+
+    private Group graph3d;
+    private Camera camera;
+
+    public Camera getCamera() {
+        return camera;
+    }
+
+    public void setCamera(Camera camera) {
+        this.camera = camera;
+    }
 
     private Timer timer;
 
@@ -72,5 +86,13 @@ public class Controls {
     }
 
     private Controls() {
+    }
+
+    public Group getGraph3d() {
+        return graph3d;
+    }
+
+    public void setGraph3d(Group graph3d) {
+        this.graph3d = graph3d;
     }
 }

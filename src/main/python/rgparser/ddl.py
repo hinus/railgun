@@ -874,7 +874,16 @@ def p_comp_op(p):
 def p_lambdef(p):
 	'''lambdef : TAG_LAMBDA ":" test
 			| TAG_LAMBDA varargslist ":" test'''
-			
+
+	if len(p) == 4:
+		p[0] = ast.Lambda(args = ast.arguments([], None, None, [], lineno = p.get_item(1).lineno, col_offset = p.get_item(1).lexpos),
+		body = p[3], lineno = p.get_item(1).lineno, col_offset = p.get_item(1).lexpos)
+	elif len(p) == 5:
+		p[0] = ast.Lambda(args = p[2], body = p[4], lineno = p.get_item(1).lineno, col_offset = p.get_item(1).lexpos)
+	#if len(p) == 5:
+	#	p[0] = ast.FunctionDef(name = "<lambda>", args = p[2], body = p[4], decorator_list = [], lineno = p.get_item(1).lineno, col_offset = p.get_item(1).lexpos)
+	
+	
 	return
 	
 
