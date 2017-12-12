@@ -463,7 +463,7 @@ def p_trailers(p):
 			p[0].lineno = p[1].lineno
 			p[0].col_offset = p[1].col_offset
 
-		elif isinstance(p[2], ast.Attribute):
+		elif isinstance(p[2], ast.Attribute) or isinstance(p[2], ast.Subscript):
 			p[0] = p[2]
 			p[0].value = p[1]
 			p[0].lineno = p[1].lineno
@@ -1116,17 +1116,17 @@ def p_except_clause(p):
 	return
 	
 def p_elif_list(p):
-	'''elif_list : TAG_ELIF test ":" suite
-			| elif_list TAG_ELIF test ":" suite'''
+	'''elif_list : TAG_ELIF "(" test ")" suite
+			| elif_list TAG_ELIF "(" test ")" suite'''
 	
-	if len(p) == 5:
-		p[0] = ast.If(test = p[2], body = p[4],
+	if len(p) == 6:
+		p[0] = ast.If(test = p[3], body = p[5],
 			orelse = [], lineno = p.get_item(1).lineno,
 			col_offset = p.get_item(1).lexpos)
 
 	else:
 		p[0] = p[1]
-		p[0].orelse = [ast.If(test = p[3], body = p[5], orelse = [],
+		p[0].orelse = [ast.If(test = p[4], body = p[6], orelse = [],
 			lineno = p[1].lineno, col_offset = p[1].col_offset),]
 	
 	return

@@ -10,11 +10,13 @@ def dragMouse(x, y) {
 	c.y = y;
 }
 
-MouseMap = {
+setMouseMap({
 	"LEFT_CLICK" : drawCircle,
 	"DRAG" : dragMouse,
-};
+});
 
 def update() {
 	draw c;
 }
+
+setUpdate(update);

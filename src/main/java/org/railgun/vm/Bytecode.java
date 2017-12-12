@@ -4,6 +4,7 @@ public class Bytecode {
     // Define org.railgun.vm.Bytecode Operator Code
     static final byte POP_TOP = 1;
     static final byte ROT_TWO = 2;
+    static final byte ROT_THREE = 3;
     static final byte DUP_TOP = 4;
     static final byte UNARY_NEGATIVE = 11;
     static final byte BINARY_MULTIPLY = 20;
@@ -37,6 +38,7 @@ public class Bytecode {
     static final byte FOR_ITER = 93;
     static final byte STORE_ATTR = 95;  /* Index in name list */
     static final byte STORE_GLOBAL = 97;
+    static final byte DUP_TOPX = 99;	/* number of items to duplicate */
     static final byte LOAD_CONST = 100; /* Index in const list */
     static final byte LOAD_NAME = 101; /* Index in name list */
     static final byte BUILD_LIST = (byte) 103;

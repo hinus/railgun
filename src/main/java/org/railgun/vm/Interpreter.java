@@ -57,9 +57,14 @@ public class Interpreter {
         namesTable.put("random", new RandomMethod());
         namesTable.put("camera", new CameraMethod());
 
+        namesTable.put("len", new LenMethod());
+
+        namesTable.put("addTimer", new AddTimerMethod());
+
         namesTable.put("setKeyMap", new KeyMapMethod());
         namesTable.put("setMouseMap", new MouseMapMethod());
         namesTable.put("setUpdate", new UpdateFunctionMethod());
+        namesTable.put("setFrameCount", new FrameCountMethod());
     }
 
     public static Interpreter getInstance() {
@@ -141,10 +146,40 @@ public class Interpreter {
                     stack.push(v);
                     stack.push(w);
                     break;
+
+                case Bytecode.ROT_THREE:
+                    v = stack.pop();
+                    w = stack.pop();
+                    u = stack.pop();
+
+                    stack.push(v);
+                    stack.push(u);
+                    stack.push(w);
+                    break;
+
                 // 4
                 case Bytecode.DUP_TOP:
                     stack.push(stack.peek());
                     break;
+
+                // 99
+                case Bytecode.DUP_TOPX:
+                    if (optarg == 2) {
+                        v = stack.peek();
+                        w = stack.get(stack.size() - 2);
+                        stack.push(w);
+                        stack.push(v);
+                    }
+                    else if (optarg == 3) {
+                        v = stack.peek();
+                        w = stack.get(stack.size() - 2);
+                        u = stack.get(stack.size() - 3);
+                        stack.push(u);
+                        stack.push(w);
+                        stack.push(v);
+                    }
+                    break;
+
                 case Bytecode.UNARY_NEGATIVE:
                     v = stack.pop();
                     stack.push(-((Integer)v).intValue());

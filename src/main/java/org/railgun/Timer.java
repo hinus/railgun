@@ -4,6 +4,7 @@ import org.railgun.action.ActionController;
 import org.railgun.canvas.View;
 import org.railgun.marshal.CodeObject;
 import org.railgun.vm.Interpreter;
+import org.railgun.vm.time.UserTimerManager;
 
 /**
  * Created by hinus on 2017/12/1.
@@ -11,7 +12,18 @@ import org.railgun.vm.Interpreter;
 public class Timer extends Thread {
     volatile boolean hasDone = false;
 
-    long frameCnt = 0;
+    static int framesPerSecond = 40;
+    static long frameDuration = 1000 / framesPerSecond;
+
+    public static volatile long frameCnt = 0;
+
+    public static void setFramesPerSecond(int framesPerSecond) {
+        if (framesPerSecond <= 0 || framesPerSecond > 60)
+            return;
+
+        Timer.framesPerSecond = framesPerSecond;
+        frameDuration = 1000 / framesPerSecond;
+    }
 
     @Override
     public void run() {
@@ -25,12 +37,14 @@ public class Timer extends Thread {
                 Interpreter.getInstance().run(co);
             }
 
+            UserTimerManager.getManager().refresh(frameCnt);
+
             long duration = System.currentTimeMillis() - begin;
 
             // make sure only 50 frames per second
-            if (duration < 25) {
+            if (duration < frameDuration) {
                 try {
-                    Thread.sleep(25 - duration);
+                    Thread.sleep(frameDuration - duration);
                 } catch (InterruptedException e) {
                 }
             }

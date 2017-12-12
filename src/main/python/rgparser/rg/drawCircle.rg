@@ -22,3 +22,5 @@ def update() {
 	
 	draw l;
 }
+
+setUpdate(update);

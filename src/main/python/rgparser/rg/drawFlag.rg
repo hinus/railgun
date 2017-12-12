@@ -4,4 +4,8 @@ r3 = rect(478, 100, 222, 400, rgb(0, 85, 164));
 
 l = [r1, r2, r3];
 
-draw l;
+def flag() {
+	draw l;
+}
+
+setUpdate(flag);
