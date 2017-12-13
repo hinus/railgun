@@ -22,15 +22,17 @@ public class Interpreter {
         public Map<String, Object> varnamesTable;
         public List<Object> varnames;
         public Stack<Object> stack;
+        public Stack<Integer> blockStack;
         public byte[] optArr;
         public int pc;
 
-        Frame(List<Object> consts, List<Object> names, List<Object> varnames, byte[] optArr, Stack<Object> stack, int pc) {
+        Frame(List<Object> consts, List<Object> names, List<Object> varnames, byte[] optArr, int pc) {
             this.consts = consts;
             this.names = names;
             this.varnames = varnames;
             varnamesTable = new HashMap<>();
-            this.stack = stack;
+            this.stack = new Stack<>();
+            this.blockStack = new Stack<>();
             this.optArr = optArr;
             this.pc = pc;
         }
@@ -85,7 +87,7 @@ public class Interpreter {
     // Run with code object
     public void run (CodeObject co) {
         // Construct base frame
-        Frame baseFrame = new Frame(co.consts, co.names, co.varnames, co.bytecodes, new Stack<>(), 0);
+        Frame baseFrame = new Frame(co.consts, co.names, co.varnames, co.bytecodes, 0);
 
         // Interpret current frame
         interpret(baseFrame, new Stack<>());
@@ -94,7 +96,7 @@ public class Interpreter {
     // Run code object with arguments
     public void run (CodeObject co, Object ... args) {
         // Construct base frame
-        Frame baseFrame = new Frame(co.consts, co.names, co.varnames, co.bytecodes, new Stack<>(), 0);
+        Frame baseFrame = new Frame(co.consts, co.names, co.varnames, co.bytecodes, 0);
 
         assert args.length == co.argcount;
 
@@ -124,6 +126,7 @@ public class Interpreter {
         // Bytecode global variable
         List<Object> names = curFrame.names;
         Stack<Object> stack = curFrame.stack;
+        Stack<Integer> blockStack = curFrame.blockStack;
 
         while (pc < optLength) {
             // TODO: Make sure current pc is at optcode, not optarg
@@ -278,6 +281,10 @@ public class Interpreter {
                 // 72
                 case Bytecode.PRINT_NEWLINE:
                     break;
+                // 80
+                case Bytecode.BREAK_LOOP:
+                    pc = blockStack.pop();
+                    break;
                 // 83
                 case Bytecode.RETURN_VALUE:
                     if (! stackTrace.empty()) {
@@ -289,11 +296,16 @@ public class Interpreter {
                         varnames = curFrame.varnames;
                         varnamesTable = curFrame.varnamesTable;
                         stack = curFrame.stack;
+                        blockStack = curFrame.blockStack;
                         pc = curFrame.pc;
                         optLength = optArr.length;
                     } else {
                         return;
                     }
+                    break;
+                // 87
+                case Bytecode.POP_BLOCK:
+                    blockStack.pop();
                     break;
 
                 // TODO: Have Argument
@@ -415,6 +427,7 @@ public class Interpreter {
                     break;
                 // 120
                 case Bytecode.SETUP_LOOP:
+                    blockStack.push(pc + optarg);
                     break;
                 // 124
                 case Bytecode.LOAD_FAST:
@@ -449,7 +462,7 @@ public class Interpreter {
                         curFrame.pc = pc;
                         stackTrace.push(curFrame);
                         CodeObject co = (CodeObject) o;
-                        curFrame = new Frame(co.consts, co.names, co.varnames, co.bytecodes, new Stack<>(), 0);
+                        curFrame = new Frame(co.consts, co.names, co.varnames, co.bytecodes, 0);
 
                         consts = curFrame.consts;
                         names = curFrame.names;
@@ -457,6 +470,7 @@ public class Interpreter {
                         varnamesTable = curFrame.varnamesTable;
                         optArr = curFrame.optArr;
                         stack = curFrame.stack;
+                        blockStack = curFrame.blockStack;
                         pc = curFrame.pc;
                         optLength = optArr.length;
                         // Process Input Arguments
