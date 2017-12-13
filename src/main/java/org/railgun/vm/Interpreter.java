@@ -1,13 +1,14 @@
 package org.railgun.vm;
 
-import javafx.scene.paint.Color;
 import org.railgun.Controls;
-import org.railgun.action.*;
 import org.railgun.canvas.View;
 import org.railgun.marshal.BinaryFileParser;
 import org.railgun.marshal.CodeObject;
 import org.railgun.shape.*;
 import org.railgun.vm.intrisinc.*;
+import org.railgun.vm.object.BuiltinMethodObject;
+import org.railgun.vm.object.ListKlass;
+import org.railgun.vm.object.RGObject;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -196,14 +197,13 @@ public class Interpreter {
                 // 25
                 case Bytecode.BINARY_SUBSCR:
                     v = stack.pop();
-                    if(stack.peek() instanceof ArrayList)
-                    {
-                        ArrayList<Object> ar=(ArrayList<Object>)(stack.pop());
-                        stack.push(ar.get((int)(v))) ;
+                    w = stack.pop();
+                    if(w instanceof RGObject) {
+                        stack.push(((BuiltinMethodObject)(((RGObject)w).getAttr("get"))).call((Integer)v)) ;
                     }
                     else
                     {
-                        HashMap<Object, Object> mmap = (HashMap<Object, Object>) (stack.pop());
+                        HashMap<Object, Object> mmap = (HashMap<Object, Object>)w;
                         stack.push(mmap.get(v));
                     }
                     break;
@@ -246,8 +246,8 @@ public class Interpreter {
                     v = stack.pop();
                     u = stack.pop();
                     /* v[w] = u */
-                    if (v instanceof ArrayList) {
-                        ((ArrayList) v).set((Integer) w, u);
+                    if (v instanceof RGObject) {
+                        ((BuiltinMethodObject)((RGObject)v).getAttr("set")).call((Integer) w, u);
                     } else if (v instanceof Map) {
                         ((Map) v).put(w, u);
                     }
@@ -263,8 +263,8 @@ public class Interpreter {
                 case Bytecode.PRINT_ITEM:
                     Object printObject = stack.pop();
 
-                    if (printObject instanceof ArrayList) {
-                        for (Object obj : (ArrayList)printObject) {
+                    if (printObject instanceof RGObject) {
+                        for (Object obj : ((LinkedList)(((RGObject)printObject).getAttr("elements")))) {
                             if (obj instanceof Shape) {
                                 View.getView().drawShape((Shape)obj);
                             }
@@ -273,6 +273,8 @@ public class Interpreter {
                     else if (printObject instanceof Shape) {
                         View.getView().drawShape((Shape) printObject);
                     }
+                    else
+                        System.out.println(printObject);
 
                     break;
                 // 72
@@ -357,6 +359,9 @@ public class Interpreter {
                             stack.push(((Shape)v).getY());
                         }
                     }
+                    else if (v instanceof RGObject) {
+                        stack.push(((RGObject)v).getAttr((String)w));
+                    }
                     else {
                         try {
                             Method method = v.getClass().getMethod((String)w, double.class);
@@ -380,10 +385,10 @@ public class Interpreter {
                             stack.push(lhs <= rhs);
                             break;
                         case Bytecode.COMPARE.EQUAL:
-                            stack.push(lhs == rhs);
+                            stack.push(lhs.intValue() == rhs.intValue());
                             break;
                         case Bytecode.COMPARE.NOT_EQUAL:
-                            stack.push(lhs != rhs);
+                            stack.push(lhs.intValue() != rhs.intValue());
                             break;
                         case Bytecode.COMPARE.GREATER:
                             stack.push(lhs > rhs);
@@ -397,6 +402,16 @@ public class Interpreter {
                 case Bytecode.JUMP_FORWARD:
                     pc += optarg;
                     break;
+
+                // 111
+                case Bytecode.JUMP_IF_FALSE_OR_POP:
+                    if ((Boolean) stack.peek()) {
+                        stack.pop();
+                    }
+                    else
+                        pc = optarg;
+                    break;
+
                 // 113
                 case Bytecode.JUMP_ABSOLUTE:
                     pc = optarg;
@@ -434,6 +449,9 @@ public class Interpreter {
                     if (o instanceof InnerMethod) {
                         stack.push(((InnerMethod)o).call(nextArgs));
                     }
+                    else if (o instanceof BuiltinMethodObject) {
+                        stack.push(((BuiltinMethodObject)o).call(nextArgs));
+                    }
                     else if (o instanceof Method) {
                         try {
                             stack.push(((Method)o).invoke(Controls.getInstance().getCamera(), nextArgs));
@@ -467,13 +485,9 @@ public class Interpreter {
                 case Bytecode.MAKE_FUNCTION:
                     break;
                 case Bytecode.BUILD_LIST:
-                    ArrayList<Object> arr = new ArrayList<>(optarg);
-                    Stack<Object> argsStack = new Stack<>();
+                    RGObject arr = ListKlass.getListKlass().allocate();
                     for (int i = 0; i < optarg; ++i) {
-                        argsStack.push(stack.pop());
-                    }
-                    for (int i = 0; i < optarg; ++i) {
-                        arr.add(argsStack.pop());
+                        ((BuiltinMethodObject)arr.getAttr("addFirst")).call(stack.pop());
                     }
                     stack.push(arr);
                     break;
