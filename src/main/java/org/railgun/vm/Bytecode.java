@@ -46,6 +46,9 @@ public class Bytecode {
     static final byte LOAD_ATTR = 106; /* Index in name list */
     static final byte COMPARE_OP = 107; /* Comparison operator */
     static final byte JUMP_FORWARD = 110; /* Number of bytes to skip */
+    static final byte JUMP_IF_FALSE_OR_POP = 111; /* Target byte offset from beginning
+                                    of code */
+
     static final byte JUMP_ABSOLUTE = 113;
     static final byte POP_JUMP_IF_FALSE = 114;
     static final byte POP_JUMP_IF_TRUE = 115;

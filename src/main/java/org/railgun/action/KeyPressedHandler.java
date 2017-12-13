@@ -29,6 +29,8 @@ public class KeyPressedHandler implements EventHandler<KeyEvent> {
                 co = (CodeObject) ActionController.getActionController().getKeyMap().get("VK_SPACE");
                 break;
         }
-        Interpreter.getInstance().run(co);
+
+        if (co != null)
+            Interpreter.getInstance().run(co);
     }
 }

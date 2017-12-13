@@ -14,7 +14,7 @@ public class ActionController {
 
     private HashMap mouseMap = new HashMap();
 
-    private CodeObject updateFunction;
+    private volatile CodeObject updateFunction;
 
     public CodeObject getUpdateFunction() {
         return updateFunction;
