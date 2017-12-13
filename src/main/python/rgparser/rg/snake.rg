@@ -46,34 +46,30 @@ def onTimer() {
 
 def onLeft() {
 	global direction;
-	if (direction == DIR_RIGHT) {
-		return;
+	if (direction != DIR_RIGHT) {
+		direction = DIR_LEFT;
 	}
-	direction = DIR_LEFT;
 }
 
 def onRight() {
 	global direction;
-	if (direction == DIR_LEFT) {
-		return;
+	if (direction != DIR_LEFT) {
+		direction = DIR_RIGHT;
 	}
-	direction = DIR_RIGHT;
 }
 
 def onUp() {
 	global direction;
-	if (direction == DIR_DOWN) {
-		return;
+	if (direction != DIR_DOWN) {
+		direction = DIR_UP;
 	}
-	direction = DIR_UP;
 }
 
 def onDown() {
 	global direction;
-	if (direction == DIR_UP) {
-		return;
+	if (direction != DIR_UP) {
+		direction = DIR_DOWN;
 	}
-	direction = DIR_DOWN;
 }
 
 setKeyMap({

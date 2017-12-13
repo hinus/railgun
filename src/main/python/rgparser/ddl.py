@@ -1126,7 +1126,12 @@ def p_elif_list(p):
 
 	else:
 		p[0] = p[1]
-		p[0].orelse = [ast.If(test = p[4], body = p[6], orelse = [],
+		
+		last_if = p[0]
+		while len(last_if.orelse) > 0:
+			last_if = last_if.orelse[0]
+		
+		last_if.orelse = [ast.If(test = p[4], body = p[6], orelse = [],
 			lineno = p[1].lineno, col_offset = p[1].col_offset),]
 	
 	return
