@@ -291,6 +291,8 @@ public class Interpreter {
                         stack = curFrame.stack;
                         pc = curFrame.pc;
                         optLength = optArr.length;
+                    } else {
+                        return;
                     }
                     break;
 
