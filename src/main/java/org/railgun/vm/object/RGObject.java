@@ -41,7 +41,7 @@ public class RGObject {
     public Object getAttr(String name) {
         Object o = null;
 
-        if (properties.containsKey(name))
+        if (properties != null && properties.containsKey(name))
             o = properties.get(name);
         else
             o = klass.getAttr(name);

@@ -23,7 +23,12 @@ public class UserTimerManager {
     }
 
     public UserTimer addTimer(int frame, CodeObject onTimer, boolean isLoop) {
-        UserTimer u = new UserTimer(frame, onTimer, isLoop);
+        UserTimer u = (UserTimer) UserTimerKlass.getInstance().allocate();
+        u.setEventFrame(frame);
+        u.setOnTimer(onTimer);
+        u.setLoop(isLoop);
+        u.setEnabled(true);
+
         u.setRegFrame(Timer.frameCnt);
         timerQueue.add(u);
 
@@ -39,14 +44,19 @@ public class UserTimerManager {
             return;
 
         while (topTimer.getRegFrame() + topTimer.getEventFrame() < frameCnt) {
-            Interpreter.getInstance().run(topTimer.getOnTimer());
+            if (topTimer.isEnabled()) {
+                Interpreter.getInstance().run(topTimer.getOnTimer());
+            }
 
             timerQueue.remove();
 
-            if (topTimer.isLoop()) {
+            if (topTimer.isEnabled() && topTimer.isLoop()) {
                 topTimer.setRegFrame(frameCnt);
                 timerQueue.add(topTimer);
             }
+
+            if (timerQueue.isEmpty())
+                break;
 
             topTimer = timerQueue.peek();
         }
