@@ -7,6 +7,7 @@ import org.railgun.marshal.CodeObject;
 import org.railgun.shape.*;
 import org.railgun.vm.intrisinc.*;
 import org.railgun.vm.object.BuiltinMethodObject;
+import org.railgun.vm.object.Klass;
 import org.railgun.vm.object.ListKlass;
 import org.railgun.vm.object.RGObject;
 
@@ -128,6 +129,8 @@ public class Interpreter {
         List<Object> names = curFrame.names;
         Stack<Object> stack = curFrame.stack;
         Stack<Integer> blockStack = curFrame.blockStack;
+
+        namesTable.put("__name__", "__main__");
 
         while (pc < optLength) {
             // TODO: Make sure current pc is at optcode, not optarg
@@ -287,6 +290,11 @@ public class Interpreter {
                 case Bytecode.BREAK_LOOP:
                     pc = blockStack.pop();
                     break;
+
+                // 82
+                case Bytecode.LOAD_LOCALS:
+                    stack.push(varnamesTable);
+                    break;
                 // 83
                 case Bytecode.RETURN_VALUE:
                     if (! stackTrace.empty()) {
@@ -308,6 +316,12 @@ public class Interpreter {
                 // 87
                 case Bytecode.POP_BLOCK:
                     blockStack.pop();
+                    break;
+
+                // 89
+                case Bytecode.BUILD_CLASS:
+                    Klass klass = new Klass((HashMap<String, Object>)stack.pop());
+                    stack.push(klass);
                     break;
 
                 // TODO: Have Argument
@@ -354,7 +368,13 @@ public class Interpreter {
                 case Bytecode.LOAD_GLOBAL:
                 // 101
                 case Bytecode.LOAD_NAME:
-                    stack.push(namesTable.get(names.get(optarg)));
+                    v = names.get(optarg);
+                    w = namesTable.get(v);
+
+                    if (w == null)
+                        throw new RuntimeException("Unknow variable : " + v);
+
+                    stack.push(w);
                     break;
                 // 100
                 case Bytecode.LOAD_CONST:
@@ -476,6 +496,9 @@ public class Interpreter {
                             e.printStackTrace();
                         }
                     }
+                    else if (o instanceof Klass) {
+                        stack.push(((Klass)o).allocate());
+                    }
                     else {
                         curFrame.pc = pc;
                         stackTrace.push(curFrame);
@@ -520,6 +543,9 @@ public class Interpreter {
                     HashMap<Object, Object> map = (HashMap<Object, Object>) (stack.peek());
                     map.put(objLeft, objRight);
                     break;
+
+                default:
+                    throw new RuntimeException("Unimplemented bytecode : " + optcode);
             }
         }
     }

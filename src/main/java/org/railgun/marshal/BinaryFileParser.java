@@ -1,5 +1,7 @@
 package org.railgun.marshal;
 
+import org.railgun.vm.object.NoneObject;
+
 import java.util.ArrayList;
 
 /**
@@ -179,7 +181,7 @@ public class BinaryFileParser {
                     list.add(getString(buf));
                     break;
                 case 'N':
-                    list.add(null);
+                    list.add(NoneObject.getInstance());
                     break;
                 case 'i':
                     list.add(getLong(buf));

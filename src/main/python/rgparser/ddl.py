@@ -241,26 +241,26 @@ def p_decorated(p):
 	return
 
 def p_classdef(p):
-	'''classdef : TAG_CLASS NAME ":" suite
-			| TAG_CLASS NAME "(" testlist ")" ":" suite
-			| TAG_CLASS NAME "(" ")" ":" suite'''
+	'''classdef : TAG_CLASS NAME suite
+			| TAG_CLASS NAME "(" testlist ")" suite
+			| TAG_CLASS NAME "(" ")" suite'''
 	
 	p[0] = ast.ClassDef(name = p[2], bases = [], body = None, decorator_list = [], 
 		lineno = p.get_item(1).lineno, col_offset = p.get_item(1).lexpos)
 
-	if len(p) == 5:
-		p[0].body = p[4]
+	if len(p) == 4:
+		p[0].body = p[3]
 
-	elif len(p) == 8:
+	elif len(p) == 7:
 		base = p[4]
 		if not isinstance(base, list):
 			base = [base,]
 
 		p[0].bases = base
-		p[0].body = p[7]
-
-	elif len(p) == 7:
 		p[0].body = p[6]
+
+	elif len(p) == 6:
+		p[0].body = p[5]
 
 	return
 	

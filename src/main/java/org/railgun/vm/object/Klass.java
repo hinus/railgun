@@ -12,6 +12,10 @@ public class Klass {
         klassProps = new HashMap<>();
     }
 
+    public Klass(HashMap<String, Object> klassProps) {
+        this.klassProps = klassProps;
+    }
+
     public RGObject allocate() {
         RGObject o = new RGObject(this, new HashMap<>());
 

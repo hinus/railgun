@@ -28,8 +28,10 @@ public class Bytecode {
     static final byte PRINT_NEWLINE = 72;
 
     static final byte BREAK_LOOP = 80;
+    static final byte LOAD_LOCALS = 82;
     static final byte RETURN_VALUE = 83;
     static final byte POP_BLOCK = 87;
+    static final byte BUILD_CLASS = 89;
 
     // TODO: This is a separator
     static final byte HAVE_ARGUMENT = 90; /* Opcodes from here have an argument: */
