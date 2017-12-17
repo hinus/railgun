@@ -18,16 +18,13 @@ public class CompileHandler implements EventHandler<ActionEvent> {
         FileManager fileManager = FileManager.getInstance();
         String sourceFileName = fileManager.getSourceFileName();
         if (sourceFileName != null) {
-            Process p = null;
             try {
-                p = Runtime.getRuntime().exec("cmd /c \"cd .\\main\\python\\rgparser && python ddl.py\" " + fileManager.getSourceFileName());
+                String windowsCmd = "cmd /c \"cd .\\main\\python\\rgparser && python ddl.py " + fileManager.getSourceFileName() +" > nul\"";
+                Process p = Runtime.getRuntime().exec(windowsCmd);
+
+                p.waitFor();
             } catch (IOException e) {
                 e.printStackTrace();
-            }
-            int exitVal = 0;
-
-            try {
-                exitVal = p.waitFor();
             } catch (InterruptedException e) {
                 // TODO: Need to process exitVal != 0;
                 e.printStackTrace();

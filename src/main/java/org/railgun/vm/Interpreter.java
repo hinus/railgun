@@ -6,10 +6,7 @@ import org.railgun.marshal.BinaryFileParser;
 import org.railgun.marshal.CodeObject;
 import org.railgun.shape.*;
 import org.railgun.vm.intrisinc.*;
-import org.railgun.vm.object.BuiltinMethodObject;
-import org.railgun.vm.object.Klass;
-import org.railgun.vm.object.ListKlass;
-import org.railgun.vm.object.RGObject;
+import org.railgun.vm.object.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -17,58 +14,35 @@ import java.util.*;
 
 public class Interpreter {
 
-    // Stack based Virtual Machine
-    private static class Frame {
-        public List<Object> consts;
-        public List<Object> names;
-        public Map<String, Object> varnamesTable;
-        public List<Object> varnames;
-        public Stack<Object> stack;
-        public Stack<Integer> blockStack;
-        public byte[] optArr;
-        public int pc;
-
-        Frame(List<Object> consts, List<Object> names, List<Object> varnames, byte[] optArr, int pc) {
-            this.consts = consts;
-            this.names = names;
-            this.varnames = varnames;
-            varnamesTable = new HashMap<>();
-            this.stack = new Stack<>();
-            this.blockStack = new Stack<>();
-            this.optArr = optArr;
-            this.pc = pc;
-        }
-    }
-
     private static Interpreter instance = new Interpreter();
 
     private static boolean x86 = false;
 
     private Interpreter() {
-        namesTable.put("True", Boolean.TRUE);
-        namesTable.put("False", Boolean.FALSE);
+        builtinsTables.put("True", Boolean.TRUE);
+        builtinsTables.put("False", Boolean.FALSE);
 
-        namesTable.put("circle", new CircleMethod());
-        namesTable.put("rgb", new RgbMethod());
+        builtinsTables.put("circle", new CircleMethod());
+        builtinsTables.put("rgb", new RgbMethod());
 
-        namesTable.put("line", new RGLineMethod());
-        namesTable.put("roundrect", new RGRoundRectMethod());
-        namesTable.put("rect", new RGRectMethod());
+        builtinsTables.put("line", new RGLineMethod());
+        builtinsTables.put("roundrect", new RGRoundRectMethod());
+        builtinsTables.put("rect", new RGRectMethod());
 
-        namesTable.put("rgtext", new RGTextMethod());
-        namesTable.put("star", new StarMethod());
+        builtinsTables.put("rgtext", new RGTextMethod());
+        builtinsTables.put("star", new StarMethod());
 
-        namesTable.put("random", new RandomMethod());
-        namesTable.put("camera", new CameraMethod());
+        builtinsTables.put("random", new RandomMethod());
+        builtinsTables.put("camera", new CameraMethod());
 
-        namesTable.put("len", new LenMethod());
+        builtinsTables.put("len", new LenMethod());
 
-        namesTable.put("addTimer", new AddTimerMethod());
+        builtinsTables.put("addTimer", new AddTimerMethod());
 
-        namesTable.put("setKeyMap", new KeyMapMethod());
-        namesTable.put("setMouseMap", new MouseMapMethod());
-        namesTable.put("setUpdate", new UpdateFunctionMethod());
-        namesTable.put("setFrameCount", new FrameCountMethod());
+        builtinsTables.put("setKeyMap", new KeyMapMethod());
+        builtinsTables.put("setMouseMap", new MouseMapMethod());
+        builtinsTables.put("setUpdate", new UpdateFunctionMethod());
+        builtinsTables.put("setFrameCount", new FrameCountMethod());
     }
 
     public static Interpreter getInstance() {
@@ -76,7 +50,7 @@ public class Interpreter {
     }
 
     // Global variable table
-    private Map<String, Object> namesTable = new HashMap<>();
+    private Map<String, Object> builtinsTables = new HashMap<>();
 
     // Run with source bytes
     public void run (byte[] sourceBytes) {
@@ -87,24 +61,26 @@ public class Interpreter {
     }
 
     // Run with code object
-    public void run (CodeObject co) {
+    private void run (CodeObject co) {
+        Map<String, Object> globalsTable = new HashMap<>();
+        globalsTable.put("__name__", "__main__");
+
         // Construct base frame
-        Frame baseFrame = new Frame(co.consts, co.names, co.varnames, co.bytecodes, 0);
+        RGFrameObject baseFrame = new RGFrameObject(co, globalsTable, globalsTable, 0);
 
         // Interpret current frame
         interpret(baseFrame, new Stack<>());
     }
 
-    // Run code object with arguments
-    public void run (CodeObject co, Object ... args) {
+    public void run(RGFunctionObject fo, Object ... args) {
         // Construct base frame
-        Frame baseFrame = new Frame(co.consts, co.names, co.varnames, co.bytecodes, 0);
+        RGFrameObject baseFrame = new RGFrameObject(fo.co, new HashMap<>(), fo.globalsTable, 0);
 
-        assert args.length == co.argcount;
+        assert args.length == fo.argcount;
 
         // Construct arguments
-        for (int i = 0; i < co.argcount; ++i) {
-            baseFrame.varnamesTable.put((String) co.varnames.get(i), args[i]);
+        for (int i = 0; i < fo.argcount; ++i) {
+            baseFrame.frameLocalsTable.put((String) fo.co.varnames.get(i), args[i]);
         }
 
         // Interpret current frame
@@ -112,7 +88,7 @@ public class Interpreter {
     }
 
     // Interpret Instructions
-    void interpret (Frame curFrame, Stack<Frame> stackTrace) {
+    void interpret (RGFrameObject curFrame, Stack<RGFrameObject> stackTrace) {
         // Program Counter
         int pc = curFrame.pc;
         // Bytecodes Array
@@ -124,13 +100,14 @@ public class Interpreter {
         List<Object> consts = curFrame.consts;
         // Bytecode local variable
         List<Object> varnames = curFrame.varnames;
-        Map<String, Object> varnamesTable = curFrame.varnamesTable;
+        Map<String, Object> localsTable = curFrame.frameLocalsTable;
+
         // Bytecode global variable
         List<Object> names = curFrame.names;
-        Stack<Object> stack = curFrame.stack;
-        Stack<Integer> blockStack = curFrame.blockStack;
+        Map<String, Object> globalsTable = curFrame.frameGlobalsTable;
 
-        namesTable.put("__name__", "__main__");
+        Stack<Object> stack = curFrame.frameStack;
+        Stack<Integer> blockStack = curFrame.blockStack;
 
         while (pc < optLength) {
             // TODO: Make sure current pc is at optcode, not optarg
@@ -293,19 +270,20 @@ public class Interpreter {
 
                 // 82
                 case Bytecode.LOAD_LOCALS:
-                    stack.push(varnamesTable);
+                    stack.push(localsTable);
                     break;
                 // 83
                 case Bytecode.RETURN_VALUE:
                     if (! stackTrace.empty()) {
                         curFrame = stackTrace.pop();
-                        curFrame.stack.push(stack.pop());
+                        curFrame.frameStack.push(stack.pop());
                         consts = curFrame.consts;
                         optArr = curFrame.optArr;
                         names = curFrame.names;
                         varnames = curFrame.varnames;
-                        varnamesTable = curFrame.varnamesTable;
-                        stack = curFrame.stack;
+                        localsTable = curFrame.frameLocalsTable;
+                        globalsTable = curFrame.frameGlobalsTable;
+                        stack = curFrame.frameStack;
                         blockStack = curFrame.blockStack;
                         pc = curFrame.pc;
                         optLength = optArr.length;
@@ -340,17 +318,21 @@ public class Interpreter {
                             ((Shape)v).setY((Integer)w);
                         }
                     }
-
                     break;
 
+                // 90
+                // TODO: STORE_NAME 将变量存到 localsTable中，需要保证 这个指令出现时 localsTable == globalsTable
+                case Bytecode.STORE_NAME:
+                    assert localsTable == globalsTable;
+                    v = names.get(optarg);
+                    w = stack.pop();
+                    localsTable.put((String)v, w);
+                    break;
                 // 97
                 case Bytecode.STORE_GLOBAL:
-                // 90
-                case Bytecode.STORE_NAME:
-                    String strV = (String)names.get(optarg);
+                    v = names.get(optarg);
                     w = stack.pop();
-                    namesTable.put(strV, w);
-
+                    globalsTable.put((String)v, w);
                     break;
                 // 93
                 case Bytecode.FOR_ITER:
@@ -364,15 +346,30 @@ public class Interpreter {
                         }
                     }
                     break;
-                // 116
-                case Bytecode.LOAD_GLOBAL:
                 // 101
                 case Bytecode.LOAD_NAME:
                     v = names.get(optarg);
-                    w = namesTable.get(v);
 
-                    if (w == null)
-                        throw new RuntimeException("Unknow variable : " + v);
+                    // LGB: Local -> Global -> Builtins
+                    // TODO Assert: 运算顺序从左到右
+                    if (((w = localsTable.get(v)) == null)
+                            && ((w = globalsTable.get(v)) == null)
+                            && ((w = builtinsTables.get(v)) == null)) {
+                        throw new RuntimeException("Unknow name variable : " + v);
+                    }
+
+                    stack.push(w);
+                    break;
+                // 116
+                case Bytecode.LOAD_GLOBAL:
+                    v = names.get(optarg);
+
+                    // LGB: Global -> Builtins
+                    // TODO Assert: 运算顺序从左到右
+                    if (((w = globalsTable.get(v)) == null)
+                            && ((w = builtinsTables.get(v)) == null)) {
+                        //throw new RuntimeException("Unknow global variable : " + v + " in " + curFrame.co.name);
+                    }
 
                     stack.push(w);
                     break;
@@ -466,11 +463,18 @@ public class Interpreter {
                     break;
                 // 124
                 case Bytecode.LOAD_FAST:
-                    stack.push(varnamesTable.get(varnames.get(optarg)));
+                    v = varnames.get(optarg);
+                    w = localsTable.get(v);
+                    if (w == null) {
+                        throw new RuntimeException("Unavailable local variable " + v);
+                    }
+                    stack.push(w);
                     break;
                 // 125
                 case Bytecode.STORE_FAST:
-                    varnamesTable.put((String)varnames.get(optarg), stack.pop());
+                    v = varnames.get(optarg);
+                    w = stack.pop();
+                    localsTable.put((String)v, w);
                     break;
                 // 131
                 case Bytecode.CALL_FUNCTION:
@@ -500,28 +504,54 @@ public class Interpreter {
                         stack.push(((Klass)o).allocate());
                     }
                     else {
+                        // 保存上下文
                         curFrame.pc = pc;
                         stackTrace.push(curFrame);
-                        CodeObject co = (CodeObject) o;
-                        curFrame = new Frame(co.consts, co.names, co.varnames, co.bytecodes, 0);
 
+                        RGFunctionObject fo = (RGFunctionObject) o;
+                        int defaultcount = fo.defaultsTable.size();
+                        int argcount = fo.argcount;
+                        // 保证参数数目的正确性
+                        if((optarg + defaultcount < argcount) || (optarg < argcount)) {
+                            throw new RuntimeException("RGException: Function " + fo.name + " Need "
+                            + argcount + " parameters, but input parameters number not match!");
+                        }
+
+                        curFrame = new RGFrameObject(fo.co, new HashMap<>(), globalsTable, 0);
+
+                        // 切换上下文
                         consts = curFrame.consts;
                         names = curFrame.names;
                         varnames = curFrame.varnames;
-                        varnamesTable = curFrame.varnamesTable;
+                        localsTable = curFrame.frameLocalsTable;
+                        globalsTable = curFrame.frameGlobalsTable;
                         optArr = curFrame.optArr;
-                        stack = curFrame.stack;
+                        stack = curFrame.frameStack;
                         blockStack = curFrame.blockStack;
                         pc = curFrame.pc;
                         optLength = optArr.length;
-                        // Process Input Arguments
-                        for (int i = nextArgs.length-1; i >= 0; --i) {
-                            varnamesTable.put((String) varnames.get(nextArgs.length - 1 - i), nextArgs[i]);
+                        // 处理调用参数
+                        // i -> stack args; j -> local args;
+                        for (int i = optarg-1, j = 0; i >= 0; --i, ++j) {
+                            localsTable.put((String) varnames.get(j), nextArgs[i]);
+                        }
+                        // 处理默认参数
+                        // i -> default args; j ->  local args;
+                        for (int i = fo.argcount-optarg-1, j = optarg; j < fo.argcount; --i, ++j) {
+                            localsTable.put((String) varnames.get(j), fo.defaultsTable.get(i));
                         }
                     }
                     break;
                 // 132
                 case Bytecode.MAKE_FUNCTION:
+                    CodeObject co = (CodeObject) stack.pop();  // Code Object
+                    List<Object> defaultTable = new ArrayList<>(optarg);
+                    // process default arguments
+                    for(int i = 0; i < optarg; ++i) {
+                        defaultTable.add(stack.pop());
+                    }
+                    RGFunctionObject functionObject = new RGFunctionObject(co, globalsTable, defaultTable);
+                    stack.push(functionObject);
                     break;
                 case Bytecode.BUILD_LIST:
                     RGObject arr = ListKlass.getListKlass().allocate();

@@ -34,7 +34,7 @@ public class OpenBinaryHandler implements EventHandler<ActionEvent> {
         if (initialDirectory != null)
             fileChooser.setInitialDirectory(initialDirectory);
         else
-            fileChooser.setInitialDirectory(new File("C:\\hinusDocs\\github\\railgun\\src\\main\\python\\rgparser\\rg"));
+            fileChooser.setInitialDirectory(new File("e:\\Github\\railgun\\src\\main\\python\\rgparser\\rg"));
         fileChooser.getExtensionFilters().addAll(
                 new FileChooser.ExtensionFilter("RailGun Binary File", "*.rgb"));
 

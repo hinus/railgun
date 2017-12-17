@@ -1,7 +1,7 @@
 package org.railgun.vm.time;
 
-import org.railgun.marshal.CodeObject;
 import org.railgun.vm.object.Klass;
+import org.railgun.vm.object.RGFunctionObject;
 import org.railgun.vm.object.RGObject;
 
 import java.util.HashMap;
@@ -11,7 +11,7 @@ import java.util.HashMap;
  */
 public class UserTimer extends RGObject implements Comparable<UserTimer> {
     private int eventFrame;
-    private CodeObject onTimer;
+    private RGFunctionObject onTimer;
     private boolean isLoop;
 
     private boolean enabled;
@@ -19,7 +19,7 @@ public class UserTimer extends RGObject implements Comparable<UserTimer> {
     // the frame count in which timer is registered.
     private long regFrame;
 
-    public UserTimer(int eventFrame, CodeObject onTimer, boolean isLoop) {
+    public UserTimer(int eventFrame, RGFunctionObject onTimer, boolean isLoop) {
         this.eventFrame = eventFrame;
         this.onTimer = onTimer;
         this.isLoop = isLoop;
@@ -48,11 +48,11 @@ public class UserTimer extends RGObject implements Comparable<UserTimer> {
         this.eventFrame = eventFrame;
     }
 
-    public CodeObject getOnTimer() {
+    public RGFunctionObject getOnTimer() {
         return onTimer;
     }
 
-    public void setOnTimer(CodeObject onTimer) {
+    public void setOnTimer(RGFunctionObject onTimer) {
         this.onTimer = onTimer;
     }
 
