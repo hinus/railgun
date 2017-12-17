@@ -1,10 +1,9 @@
 package org.railgun.action;
 
 import javafx.event.EventHandler;
-import javafx.scene.input.MouseDragEvent;
 import javafx.scene.input.MouseEvent;
-import org.railgun.marshal.CodeObject;
 import org.railgun.vm.Interpreter;
+import org.railgun.vm.object.RGFunctionObject;
 
 import java.util.HashMap;
 
@@ -19,11 +18,11 @@ public class MouseDragHandler implements EventHandler<MouseEvent> {
         if (mouseMap == null || mouseMap.isEmpty())
             return;
 
-        CodeObject co = (CodeObject)mouseMap.get("DRAG");
+        RGFunctionObject fo = (RGFunctionObject)mouseMap.get("DRAG");
 
-        if (co == null)
+        if (fo == null)
             return;
 
-        Interpreter.getInstance().run(co, Integer.valueOf((int)event.getX()), Integer.valueOf((int)event.getY()));
+        Interpreter.getInstance().run(fo, Integer.valueOf((int)event.getX()), Integer.valueOf((int)event.getY()));
     }
 }

@@ -1,6 +1,6 @@
 package org.railgun.action;
 
-import org.railgun.marshal.CodeObject;
+import org.railgun.vm.object.RGFunctionObject;
 
 import java.util.HashMap;
 
@@ -14,13 +14,13 @@ public class ActionController {
 
     private HashMap mouseMap = new HashMap();
 
-    private volatile CodeObject updateFunction;
+    private volatile RGFunctionObject updateFunction;
 
-    public CodeObject getUpdateFunction() {
+    public RGFunctionObject getUpdateFunction() {
         return updateFunction;
     }
 
-    public void setUpdateFunction(CodeObject updateFunction) {
+    public void setUpdateFunction(RGFunctionObject updateFunction) {
         this.updateFunction = updateFunction;
     }
 

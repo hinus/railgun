@@ -1,8 +1,8 @@
 package org.railgun.vm.time;
 
 import org.railgun.Timer;
-import org.railgun.marshal.CodeObject;
 import org.railgun.vm.Interpreter;
+import org.railgun.vm.object.RGFunctionObject;
 
 import java.util.PriorityQueue;
 
@@ -22,7 +22,7 @@ public class UserTimerManager {
         return manager;
     }
 
-    public UserTimer addTimer(int frame, CodeObject onTimer, boolean isLoop) {
+    public UserTimer addTimer(int frame, RGFunctionObject onTimer, boolean isLoop) {
         UserTimer u = (UserTimer) UserTimerKlass.getInstance().allocate();
         u.setEventFrame(frame);
         u.setOnTimer(onTimer);
